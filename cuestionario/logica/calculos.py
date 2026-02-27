@@ -32,7 +32,7 @@ def generar_consolidado(trabajador, periodo=None):
         p_jefe = 0
         diff = 0
         
-        # LÓGICA DE CRUCES:
+        # LÓGICA DE CRUCE:
         if tiene_jefe and respuestas_jefe.exists():
             # Si tiene jefe, buscamos la respuesta espejo
             r_jefe = respuestas_jefe.filter(codigo_excel=r_auto.codigo_excel).first()
