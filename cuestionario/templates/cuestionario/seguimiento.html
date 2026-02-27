@@ -1,0 +1,97 @@
+{% extends "cuestionario/base.html" %}
+
+{% block content %}
+<section>
+    <header>
+        <h2>Seguimiento</h2>
+    </header>
+
+    <div class="row">
+        <div class="col-6 col-12-small">
+            <h3>Autoevaluaciones listas: {{ autos_listas }}</h3>
+            <h3>Autoevaluaciones pendientes: {{ autos_pendientes }}</h3>
+        </div>
+        <div class="col-6 col-12-small">
+            <h3>Evaluaciones de Jefatura listas: {{ jefaturas_listas }}</h3>
+            <h3>Evaluaciones de Jefatura pendientes: {{ jefaturas_pendientes }}</h3>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="table-wrapper">
+        <table class="alt">
+            <thead>
+                <tr>
+                    <th>Colaborador</th>
+                    <th style="text-align: center;">Nivel</th>
+                    <th style="text-align: center;">Autoevaluación</th>
+                    <th style="text-align: center;">Ev. Jefatura</th>
+                    <th style="text-align: center;">Ver Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trabajadores %}
+                <tr>
+                    <td>
+                        <strong>{{ t.nombre }} {{ t.apellido_paterno }} {{ t.apellido_materno }}</strong><br>
+                        <small>{{ t.cargo.nombre_cargo }}</small>
+                    </td>
+                    <td style="text-align: center;">
+                        <strong>{{ t.nivel_jerarquico }}</strong><br>
+                    </td>
+                    
+                    <td style="text-align: center;">
+                        {% if t.auto_lista %}
+                            <span style="color: #51ff85;">✅ Lista</span>
+                        {% else %}
+                            <span style="color: #ffc107;">⏳ Pendiente</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align: center;">
+                        {% if not t.tiene_jefe %}
+                            <span style="opacity: 0.3;">N/A</span>
+                        {% elif t.jefe_lista %}
+                            <span style="color: #51ff85;">✅ Lista</span>
+                        {% else %}
+                            <span style="color: #ffc107;">⏳ Pendiente</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align: center;">
+                        {% if t.diff_promedio is not None %}
+                            <a href="{% url 'detalle_seguimiento' t.id_trabajador %}" class="button small primary">
+                                Ver Detalle
+                            </a>
+                        {% else %}
+                            <small style="opacity: 0.3;">---</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <ul class="actions">
+    <li>
+        <a href="{% url 'index' %}" class="button primary">Volver al Panel</a>
+    </li>
+    
+    {% if user.is_superuser %}
+    <li>
+        <a href="{% url 'generar_reporte_global_pdf' %}" class="button primary">
+            📊 Generar Reporte Respuestas
+        </a>
+    </li>
+    
+    <li>
+        <a href="{% url 'panel_gemini' %}" class="button primary">
+            🤖 Panel Informe con IA
+        </a>
+    </li>
+    {% endif %}
+    </ul>
+</section>
+{% endblock %}

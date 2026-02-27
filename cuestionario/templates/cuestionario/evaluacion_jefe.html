@@ -1,0 +1,109 @@
+{% extends "cuestionario/base.html" %}
+
+{% block title %}Evaluando a {{ evaluado.nombre }} - {{ dimension }}{% endblock %}
+
+{% block content %}
+<section>
+    <header>
+        <p style="font-size: 1.1em; margin-top: -0.5em; margin-bottom: 1.5em; border-bottom: solid 1px rgba(255, 255, 255, 0.125); padding-bottom: 0.5em;">
+            Evaluador: <strong>{{ evaluador.nombre }} {{ evaluador.apellido_paterno }} {{ evaluador.apellido_materno }}</strong><br>
+            Evaluando a: <strong style="color: #51ff85;">{{ evaluado.nombre }} {{ evaluado.apellido_paterno }} {{ evaluado.apellido_materno }}</strong>
+        </p>
+        
+        <h2>Evaluación de Desempeño (Jefatura)</h2>
+        <h3 style="color: {% if dimension == 'Organizacional' %}#51ff85{% else %}#2196F3{% endif %};">
+            Dimensión: {{ dimension }}
+        </h3>
+    </header>
+
+    <form method="POST" onsubmit="this.btnSubmit.disabled=true; this.btnSubmit.innerText='Guardando...'; return true;">
+        {% csrf_token %}
+        
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr style="background: {% if dimension == 'Organizacional' %}rgba(81, 255, 133, 0.1){% else %}rgba(33, 150, 243, 0.1){% endif %};">
+                        <th style="width: 6%;">Código</th>
+                        <th style="width: 47%;">Competencia / Indicador {{ dimension }}</th>
+                        <th style="width: 47%;">Evaluación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in preguntas %}
+                    <tr>
+                        <td style="vertical-align: middle; text-align: center;"><strong>{{ p.codigo_excel }}</strong></td>
+                        <td style="vertical-align: top;">
+                            <span style="font-weight: bold; color: {% if dimension == 'Organizacional' %}#51ff85{% else %}#2196F3{% endif %}; font-size: 1.2em;">
+                                {{ p.competencia.nombre_competencia }}
+                            </span><br>
+                            <small style="line-height: 1.2; display: block; margin-top: 5px; opacity: 0.8;">{{ p.texto }}</small>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                {% for i in "1234" %}
+                                <div style="background: rgba(255,255,255,0.03); padding: 8px; border-radius: 4px; display: flex; align-items: flex-start; gap: 10px;">
+                                    <input type="radio" 
+                                           id="j_{{ p.id_textos_evaluacion }}_{{ i }}" 
+                                           name="puntaje_{{ p.id_textos_evaluacion }}" 
+                                           value="{{ i }}" 
+                                           required
+                                           style="margin-top: 4px; transform: scale(0.6);">
+                                    
+                                    <label for="j_{{ p.id_textos_evaluacion }}_{{ i }}" style="margin-bottom: 0; cursor: pointer; flex: 1;">
+                                        {% for d in descripciones %}
+                                            {% if d.codigo_excel_id == p.codigo_excel and d.escala_id|stringformat:"i" == i %}
+                                                <span style="font-weight: bold; color: #fff; font-size: 0.88em;">{{ i }}. {{ d.escala.descripcion }}:</span>
+                                                <span style="font-size: 0.85em; display: block; line-height: 1.3; opacity: 0.9;">{{ d.descripcion }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 3em; color: #ff5151;">
+                            <strong>No se encontraron preguntas cargadas para:</strong><br>
+                            Dimensión: {{ dimension }} | Nivel Jerárquico: {{ evaluado.nivel_jerarquico }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if preguntas %}
+        <div class="row gtr-uniform" style="margin-top: 2em;">
+            <div class="col-12">
+                <label for="comentario">
+                    <strong>
+                        Feedback de Jefatura sobre competencias 
+                        {% if dimension == 'Organizacional' %}organizacionales:{% else %}funcionales:{% endif %}
+                    </strong>
+                </label>
+                <textarea name="comentario" id="comentario" rows="4" 
+                          placeholder="Escriba aquí sus observaciones específicas para esta dimensión..."
+                          style="background: rgba(255,255,255,0.05); color: white;"></textarea>
+            </div>
+
+            <div class="col-12" style="margin-top: 2em; padding-bottom: 3em;">
+                <ul class="actions">
+                    <li>
+                        <button type="submit" name="btnSubmit" class="button primary">
+                            Guardar {{ dimension }}
+                        </button>
+                    </li>
+                    <li>
+                        <a href="{% url 'evaluacion_jefe_inicio' evaluador.id_trabajador evaluado.id_trabajador %}" class="button">
+                            Volver
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}
