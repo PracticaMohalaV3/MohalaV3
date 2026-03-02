@@ -4,10 +4,10 @@
 INSERT INTO ESCALA 
     (ID_ESCALA, DESCRIPCION) 
 VALUES 
-(1, 'NO LOGRA LO ESPERADO'),
-(2, 'LOGRA PARCIALMENTE LO ESPERADO'),
-(3, 'LOGRA LO ESPERADO'),
-(4, 'SUPERA LO ESPERADO');
+(1, 'No Logra lo Esperado'),
+(2, 'Logra Parcialmente lo Esperado'),
+(3, 'Logra lo Esperado'),
+(4, 'Supera lo Esperado');
 
 -- =========================
 -- Poblamiento de tabla Dimension
