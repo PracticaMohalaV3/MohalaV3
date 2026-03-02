@@ -197,7 +197,7 @@ VALUES
     (15, 'ENT2.3', 'Promueve en todas las áreas de trabajo, la capacidad para comprender las peculiaridades de los servicios.', 1, 2, 2),
     (16, 'ENE2.1', 'Desarrolla dentro y fuera de la organización la capacidad de adecuar productos, servicios y procedimientos organizacionales, a fin de amoldarse a nuevos contextos de acuerdo con la estrategia del negocio.', 1, 2, 3),
     (17, 'ENE2.2', 'Es un referente dentro y fuera de la organización por su capacidad de identificar y desarrollar oportunidades de negocio.', 1, 2, 3),
-    (18, 'ENE2.3', 'Es reconocido por su expertise, su alto conocimiento  cultural y estrategias de relacionamiento.', 1, 2, 3);
+    (18, 'ENE2.3', 'Es reconocido por su expertise, su alto conocimiento cultural y estrategias de relacionamiento.', 1, 2, 3);
 
 -- 6. ANÁLISIS Y SOLUCIÓN DE PROBLEMAS (ID_COMPETENCIA: 6) 
 INSERT INTO TEXTOS_EVALUACION  
