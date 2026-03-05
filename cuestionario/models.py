@@ -216,6 +216,21 @@ class TextosEvaluacion(models.Model):
         on_delete=models.DO_NOTHING,
         db_column='empresa_id_empresa'
     )
+    dimension = models.ForeignKey(
+        'Dimension',
+        on_delete=models.DO_NOTHING,
+        db_column='dimension_id_dimension'
+    )
+    competencia = models.ForeignKey(
+        'Competencia',
+        on_delete=models.DO_NOTHING,
+        db_column='competencia_id_competencia'
+    )
+    nivel_jerarquico = models.ForeignKey(
+        'NivelJerarquico',
+        on_delete=models.DO_NOTHING,
+        db_column='nivel_jerarquico_id_nivel_jerarquico'
+    )
 
     class Meta:
         managed = False
