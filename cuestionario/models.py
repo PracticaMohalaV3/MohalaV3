@@ -122,6 +122,7 @@ class NivelJerarquico(models.Model):
 # =========================
 class Escala(models.Model):
     id_escala = models.IntegerField(primary_key=True)
+    valor = models.IntegerField()
     descripcion = models.CharField(max_length=100)
     empresa = models.ForeignKey(
         'Empresa', 
