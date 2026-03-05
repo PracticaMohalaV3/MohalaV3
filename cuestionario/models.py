@@ -365,7 +365,6 @@ class Autoevaluacion(models.Model):
         db_column='trabajador_id_trabajador'
     )
     
-    # FK compuesta a TEXTOS_EVALUACION (Django no soporta FKs compuestas nativamente)
     textos_evaluacion_codigo_excel = models.CharField(max_length=10)
     textos_evaluacion_empresa = models.ForeignKey(
         'Empresa',

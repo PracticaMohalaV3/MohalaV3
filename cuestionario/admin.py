@@ -6,7 +6,7 @@ from .models import (
     Competencia, TextosEvaluacion, Autoevaluacion, 
     EvaluacionJefatura, ResultadoConsolidado, Escala,
     DescripcionRespuesta, PromptGemini, ReporteGlobal,
-    Biblioteca
+    Biblioteca, Empresa, CodigoEvaluacion
 )
 from django.utils.html import format_html
 from django import forms
@@ -33,9 +33,15 @@ class MyUserAdmin(BaseUserAdmin):
     def get_materno(self, obj):
         return obj.trabajador.apellido_materno if hasattr(obj, 'trabajador') else "---"
 
+@admin.register(Empresa)
+class EmpresaAdmin(admin.ModelAdmin):
+    list_display = ('id_empresa', 'nombre_empresa', 'rut_empresa', 'empresa_activa', 'registrada_en')
+    list_filter = ('empresa_activa',)
+    search_fields = ('nombre_empresa', 'rut_empresa')
+
 @admin.register(Escala)
 class EscalaAdmin(admin.ModelAdmin):
-    list_display = ('id_escala', 'descripcion')
+    list_display = ('id_escala', 'descripcion', 'empresa')
     ordering = ('id_escala',)
 
 @admin.register(Trabajador)
@@ -47,18 +53,24 @@ class TrabajadorAdmin(admin.ModelAdmin):
 
 @admin.register(Cargo)
 class CargoAdmin(admin.ModelAdmin):
-    list_display = ('nombre_cargo', 'nivel_jerarquico')
-    list_filter = ('nivel_jerarquico',)
+    list_display = ('nombre_cargo', 'nivel_jerarquico', 'empresa')
+    list_filter = ('nivel_jerarquico', 'empresa')
 
 @admin.register(Competencia)
 class CompetenciaAdmin(admin.ModelAdmin):
-    list_display = ('nombre_competencia', 'dimension')
-    list_filter = ('dimension',)
+    list_display = ('nombre_competencia', 'dimension', 'empresa')
+    list_filter = ('dimension', 'empresa')
+
+@admin.register(CodigoEvaluacion)
+class CodigoEvaluacionAdmin(admin.ModelAdmin):
+    list_display = ('id_codigo_evaluacion', 'textos_evaluacion_codigo_excel', 'competencia', 'dimension', 'nivel_jerarquico', 'empresa')
+    list_filter = ('dimension', 'competencia', 'nivel_jerarquico', 'empresa')
+    search_fields = ('textos_evaluacion_codigo_excel',)
 
 @admin.register(TextosEvaluacion)
 class TextosEvaluacionAdmin(admin.ModelAdmin):
-    list_display = ('codigo_excel', 'competencia', 'nivel_jerarquico', 'get_texto_corto')
-    list_filter = ('nivel_jerarquico', 'competencia__dimension', 'competencia')
+    list_display = ('codigo_excel', 'empresa', 'get_texto_corto')
+    list_filter = ('empresa',)
     search_fields = ('codigo_excel', 'texto')
     ordering = ('id_textos_evaluacion',)
 
@@ -68,54 +80,30 @@ class TextosEvaluacionAdmin(admin.ModelAdmin):
 
 @admin.register(Autoevaluacion)
 class AutoevaluacionAdmin(admin.ModelAdmin):
-    list_display = ('trabajador', 'get_nivel_jerarquico', 'codigo_excel', 'get_competencia', 'escala', 'estado_finalizacion', 'fecha_evaluacion')
-    list_filter = ('estado_finalizacion', 'fecha_evaluacion', 'nivel_jerarquico', 'escala')
-    search_fields = ('trabajador__nombre', 'trabajador__apellido_paterno', 'codigo_excel__codigo_excel')
-    ordering = ('codigo_excel__id_textos_evaluacion',)
+    list_display = ('trabajador', 'textos_evaluacion_codigo_excel', 'escala', 'estado_finalizacion', 'fecha_evaluacion')
+    list_filter = ('estado_finalizacion', 'fecha_evaluacion', 'escala')
+    search_fields = ('trabajador__nombre', 'trabajador__apellido_paterno', 'textos_evaluacion_codigo_excel')
+    ordering = ('id_autoevaluacion',)
 
-    @admin.display(description='Nivel Jerárquico', ordering='nivel_jerarquico')
-    def get_nivel_jerarquico(self, obj):
-        return obj.nivel_jerarquico
-
-    @admin.display(description='Competencia')
-    def get_competencia(self, obj):
-        return obj.codigo_excel.competencia if obj.codigo_excel else "-"
-    
 @admin.register(EvaluacionJefatura)
 class EvaluacionJefaturaAdmin(admin.ModelAdmin):
-    list_display = ('evaluador', 'trabajador_evaluado', 'get_nivel_jerarquico', 'codigo_excel', 'get_competencia', 'escala', 'estado_finalizacion')
+    list_display = ('evaluador', 'trabajador_evaluado', 'textos_evaluacion_codigo_excel', 'escala', 'estado_finalizacion')
     list_filter = ('estado_finalizacion', 'evaluador', 'trabajador_evaluado', 'escala')
-    search_fields = ('trabajador__nombre', 'trabajador__apellido_paterno', 'codigo_excel__codigo_excel')
-    ordering = ('codigo_excel__id_textos_evaluacion',)
-
-    @admin.display(description='Nivel Jerárquico', ordering='nivel_jerarquico')
-    def get_nivel_jerarquico(self, obj):
-        return obj.nivel_jerarquico
-
-    @admin.display(description='Competencia')
-    def get_competencia(self, obj):
-        return obj.codigo_excel.competencia if obj.codigo_excel else "-"
+    search_fields = ('trabajador_evaluado__nombre', 'trabajador_evaluado__apellido_paterno', 'textos_evaluacion_codigo_excel')
+    ordering = ('id_evaluacion_jefatura',)
 
 @admin.register(ResultadoConsolidado)
 class ResultadoConsolidadoAdmin(admin.ModelAdmin):
-    list_display = ('trabajador', 'get_nivel_jerarquico', 'codigo_excel', 'get_competencia', 'puntaje_jefe', 'puntaje_autoev', 'diferencia', 'periodo')
+    list_display = ('trabajador', 'textos_evaluacion_codigo_excel', 'puntaje_jefe', 'puntaje_autoev', 'diferencia', 'periodo')
     list_filter = ('periodo', 'trabajador')
     readonly_fields = ('diferencia',)
-    ordering = ('codigo_excel__id_textos_evaluacion',)
-
-    @admin.display(description='Nivel Jerárquico', ordering='nivel_jerarquico')
-    def get_nivel_jerarquico(self, obj):
-        return obj.nivel_jerarquico
-
-    @admin.display(description='Competencia')
-    def get_competencia(self, obj):
-        return obj.codigo_excel.competencia if obj.codigo_excel else "-"
+    ordering = ('id_resultado',)
 
 @admin.register(DescripcionRespuesta)
 class DescripcionRespuestaAdmin(admin.ModelAdmin):
-    list_display = ('id_descripcion_respuesta', 'codigo_excel', 'get_descripcion_corta', 'escala', 'titulo', 'competencia', 'nivel_jerarquico')
-    list_filter = ('nivel_jerarquico', 'competencia__dimension', 'competencia', 'escala')
-    search_fields = ('codigo_excel__codigo_excel', 'titulo', 'descripcion')
+    list_display = ('id_descripcion_respuesta', 'textos_evaluacion_codigo_excel', 'get_descripcion_corta', 'escala', 'titulo', 'empresa')
+    list_filter = ('escala', 'empresa')
+    search_fields = ('textos_evaluacion_codigo_excel', 'titulo', 'descripcion')
     ordering = ('id_descripcion_respuesta',)
 
     @admin.display(description='Descripción')
