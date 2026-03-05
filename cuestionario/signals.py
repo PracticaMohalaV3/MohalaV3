@@ -1,35 +1,45 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from .models import Trabajador
+from cuestionario.models import Trabajador
 
-@receiver(post_save, sender=Trabajador)
-def crear_usuario_automatico(sender, instance, created, **kwargs):
-    if created:
-        # Si el trabajador es nuevo y no tiene usuario asignado
-        if not instance.user:
-            # 1. Creamos el usuario base
-            nuevo_usuario = User.objects.create_user(
-                username=instance.email,
-                email=instance.email,
-                password='Mohala2026'
+def get_password_por_empresa(trabajador):
+    passwords = {
+        1: 'Mohala2026',
+        2: 'Permify2026',
+    }
+    return passwords.get(trabajador.empresa_id, 'DefaultPass2026')
+
+class Command(BaseCommand):
+    help = 'Crea y vincula usuarios de Django para trabajadores'
+
+    def handle(self, *args, **kwargs):
+        self.stdout.write('Iniciando vinculación de usuarios...')
+        trabajadores_sin_user = Trabajador.objects.filter(user__isnull=True)
+        
+        contador = 0
+        for t in trabajadores_sin_user:
+            password = get_password_por_empresa(t)
+            
+            user, created = User.objects.get_or_create(
+                username=t.email,
+                defaults={
+                    'email': t.email, 
+                    'first_name': t.nombre,
+                    'last_name': f"{t.apellido_paterno} {t.apellido_materno}",
+                    'is_staff': False
+                }
             )
             
-            # 2. Forzamos la grabación de nombres y apellidos
-            nuevo_usuario.first_name = instance.nombre
-            nuevo_usuario.last_name = f"{instance.apellido_paterno} {instance.apellido_materno}"
-            nuevo_usuario.is_staff = False
-            nuevo_usuario.save()
-
-            # 3. Vinculamos al trabajador con el usuario recién creado
-            Trabajador.objects.filter(id=instance.id).update(user=nuevo_usuario)
-            
-    else:
-        if instance.user:
-            user = instance.user
-            user.first_name = instance.nombre
-            user.last_name = f"{instance.apellido_paterno} {instance.apellido_materno}"
-            # Aseguramos que siempre el email sea el username
-            user.username = instance.email
-            user.email = instance.email
+            user.first_name = t.nombre
+            user.last_name = f"{t.apellido_paterno} {t.apellido_materno}"
+            user.set_password(password)
+            user.is_staff = False 
             user.save()
+            
+            t.user = user
+            t.save()
+            
+            self.stdout.write(self.style.SUCCESS(f"✅ Usuario procesado: {t.email} (empresa {t.empresa_id})"))
+            contador += 1
+
+        self.stdout.write(self.style.SUCCESS(f'--- Proceso finalizado. {contador} usuarios listos ---'))
