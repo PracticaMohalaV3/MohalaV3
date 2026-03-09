@@ -41,7 +41,7 @@
     </div>
 
     {% for dim_nombre, dim_data in dimensiones_data.items %}
-    <h3 style="color: {% cycle '#51ff85' '#2196F3' '#ff9800' '#e040fb' %}; margin-top: 2em;">
+    <h3 style="color: {% if forloop.first %}#51ff85{% else %}#2196F3{% endif %}; margin-top: {% if forloop.first %}2em{% else %}3em{% endif %};">
         Dimensión: {{ dim_nombre }}
         {% if dim_data.promedio is not None %}
             <span style="font-size: 0.7em; opacity: 0.7; font-weight: normal;">
@@ -68,7 +68,7 @@
                         <strong>{{ r.texto_eval.codigo_excel }}</strong>
                     </td>
                     <td>
-                        <span style="color: {% cycle '#51ff85' '#2196F3' '#ff9800' '#e040fb' %}; font-weight: bold;">
+                        <span style="color: {% if forloop.parentloop.first %}#51ff85{% else %}#2196F3{% endif %}; font-weight: bold;">
                             {{ r.texto_eval.competencia.nombre_competencia }}
                         </span><br>
                         <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.texto_eval.texto }}</small>
