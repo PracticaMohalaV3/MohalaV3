@@ -8,7 +8,7 @@ def panel_seguimiento(request):
     if not request.user.is_superuser:
         return redirect('index')
 
-    trabajadores = Trabajador.objects.all().select_related('cargo')
+    trabajadores = Trabajador.objects.all().select_related('cargo', 'empresa').order_by('empresa__nombre_empresa', 'apellido_paterno')
     
     total_por_realizar = 0
     autos_listas = 0

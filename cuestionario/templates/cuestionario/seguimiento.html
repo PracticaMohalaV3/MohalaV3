@@ -24,6 +24,7 @@
             <thead>
                 <tr>
                     <th>Colaborador</th>
+                    <th style="text-align: center;">Empresa</th>
                     <th style="text-align: center;">Nivel</th>
                     <th style="text-align: center;">Autoevaluación</th>
                     <th style="text-align: center;">Ev. Jefatura</th>
@@ -36,6 +37,9 @@
                     <td>
                         <strong>{{ t.nombre }} {{ t.apellido_paterno }} {{ t.apellido_materno }}</strong><br>
                         <small>{{ t.cargo.nombre_cargo }}</small>
+                    </td>
+                    <td style="text-align: center;">
+                        <small>{{ t.empresa.nombre_empresa }}</small>
                     </td>
                     <td style="text-align: center;">
                         <strong>{{ t.nivel_jerarquico }}</strong><br>
