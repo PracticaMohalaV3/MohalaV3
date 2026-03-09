@@ -455,7 +455,7 @@ class EvaluacionJefatura(models.Model):
 # Tabla Resultado Consolidado
 # =========================
 class ResultadoConsolidado(models.Model):
-    id_resultado = models.AutoField(primary_key=True)
+    id_resultado_consolidado = models.AutoField(primary_key=True)
     puntaje_autoev = models.IntegerField()
     puntaje_jefe = models.IntegerField()
     diferencia = models.IntegerField()
