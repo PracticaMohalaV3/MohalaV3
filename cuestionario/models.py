@@ -489,6 +489,7 @@ class ResultadoConsolidado(models.Model):
     class Meta:
         managed = False
         db_table = 'RESULTADO_CONSOLIDADO'
+        unique_together = (('trabajador', 'textos_evaluacion_codigo_excel', 'periodo'),)
 
     def __str__(self):
         return f"Resultado {self.id_resultado}"
