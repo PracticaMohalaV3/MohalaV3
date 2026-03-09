@@ -40,7 +40,18 @@
         </div>
     </div>
 
-    <h3 style="color: #51ff85; margin-top: 2em;">Dimensión: Organizacional</h3>
+    {% for dim_nombre, resultados_lista in dimensiones_data.items %}
+    <h3 style="color: {% cycle '#51ff85' '#2196F3' '#ff9800' '#e040fb' %}; margin-top: 2em;">
+        Dimensión: {{ dim_nombre }}
+        {% if promedios_por_dimension|get_item:dim_nombre is not None %}
+            <span style="font-size: 0.7em; opacity: 0.7; font-weight: normal;">
+                — Diferencia promedio: 
+                {% with avg=promedios_por_dimension|get_item:dim_nombre %}
+                    {% if avg > 0 %}+{% endif %}{{ avg|floatformat:1 }}
+                {% endwith %}
+            </span>
+        {% endif %}
+    </h3>
     <div class="table-wrapper">
         <table class="alt">
             <thead>
@@ -53,16 +64,16 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in resultados_organizacionales %}
+                {% for r in resultados_lista %}
                 <tr>
                     <td style="text-align: center;">
-                        <strong>{{ r.codigo_excel.codigo_excel }}</strong>
+                        <strong>{{ r.texto_eval.codigo_excel }}</strong>
                     </td>
                     <td>
-                        <span style="color: #51ff85; font-weight: bold;">
-                            {{ r.competencia.nombre_competencia }}
+                        <span style="font-weight: bold;">
+                            {{ r.texto_eval.competencia.nombre_competencia }}
                         </span><br>
-                        <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.codigo_excel.texto }}</small>
+                        <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.texto_eval.texto }}</small>
                     </td>
                     <td style="text-align: center; vertical-align: middle;">
                         <span style="background: rgba(81, 255, 133, 0.2); color: #51ff85; padding: 0.4em 0.8em; border-radius: 15px; font-weight: bold;">
@@ -92,72 +103,28 @@
                 {% empty %}
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 2em; opacity: 0.5;">
-                        No hay datos organizacionales disponibles.
+                        No hay datos disponibles para esta dimensión.
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% empty %}
+    <div style="text-align: center; padding: 3em; opacity: 0.5;">
+        <p>No hay resultados consolidados disponibles para este colaborador.</p>
+    </div>
+    {% endfor %}
 
-    <h3 style="color: #2196F3; margin-top: 3em;">Dimensión: Funcional</h3>
-    <div class="table-wrapper">
-        <table class="alt">
-            <thead>
-                <tr>
-                    <th style="width: 8%;">Código</th>
-                    <th style="width: 40%;">Competencia / Indicador</th>
-                    <th style="text-align: center; width: 13%;">AutoEv</th>
-                    <th style="text-align: center; width: 13%;">Ev. Jefe</th>
-                    <th style="text-align: center; width: 13%;">Diferencia</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in resultados_funcionales %}
-                <tr>
-                    <td style="text-align: center;">
-                        <strong>{{ r.codigo_excel.codigo_excel }}</strong>
-                    </td>
-                    <td>
-                        <span style="color: #2196F3; font-weight: bold;">
-                            {{ r.competencia.nombre_competencia }}
-                        </span><br>
-                        <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.codigo_excel.texto }}</small>
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        <span style="background: rgba(81, 255, 133, 0.2); color: #51ff85; padding: 0.4em 0.8em; border-radius: 15px; font-weight: bold;">
-                            {{ r.puntaje_autoev }}
-                        </span>
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        {% if r.puntaje_jefe > 0 %}
-                            <span style="background: rgba(33, 150, 243, 0.2); color: #2196F3; padding: 0.4em 0.8em; border-radius: 15px; font-weight: bold;">
-                                {{ r.puntaje_jefe }}
-                            </span>
-                        {% else %}
-                            <span style="opacity: 0.3;">N/A</span>
-                        {% endif %}
-                    </td>
-                    <td style="text-align: center; vertical-align: middle;">
-                        <span style="
-                            {% if r.diferencia > 0 %}background: rgba(81, 255, 133, 0.2); color: #51ff85;
-                            {% elif r.diferencia < 0 %}background: rgba(255, 81, 81, 0.2); color: #ff5151;
-                            {% else %}background: rgba(255, 255, 255, 0.1); color: #fff;
-                            {% endif %}
-                            padding: 0.4em 0.8em; border-radius: 15px; font-weight: bold;">
-                            {% if r.diferencia > 0 %}+{% endif %}{{ r.diferencia|floatformat:0 }}
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 2em; opacity: 0.5;">
-                        No hay datos funcionales disponibles.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div style="background: rgba(255,255,255,0.05); padding: 1.5em; border-radius: 8px; margin-top: 2em; text-align: center;">
+        <strong>Diferencia promedio total: </strong>
+        {% if diff_promedio_total is not None %}
+            <span style="{% if diff_promedio_total > 0 %}color: #51ff85;{% elif diff_promedio_total < 0 %}color: #ff5151;{% endif %} font-weight: bold;">
+                {% if diff_promedio_total > 0 %}+{% endif %}{{ diff_promedio_total|floatformat:1 }}
+            </span>
+        {% else %}
+            <span style="opacity: 0.5;">N/A</span>
+        {% endif %}
     </div>
 
     <!-- BOTONES PARA REPORTES -->
