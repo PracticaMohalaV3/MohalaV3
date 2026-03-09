@@ -40,15 +40,13 @@
         </div>
     </div>
 
-    {% for dim_nombre, resultados_lista in dimensiones_data.items %}
+    {% for dim_nombre, dim_data in dimensiones_data.items %}
     <h3 style="color: {% cycle '#51ff85' '#2196F3' '#ff9800' '#e040fb' %}; margin-top: 2em;">
         Dimensión: {{ dim_nombre }}
-        {% if promedios_por_dimension|get_item:dim_nombre is not None %}
+        {% if dim_data.promedio is not None %}
             <span style="font-size: 0.7em; opacity: 0.7; font-weight: normal;">
                 — Diferencia promedio: 
-                {% with avg=promedios_por_dimension|get_item:dim_nombre %}
-                    {% if avg > 0 %}+{% endif %}{{ avg|floatformat:1 }}
-                {% endwith %}
+                {% if dim_data.promedio > 0 %}+{% endif %}{{ dim_data.promedio|floatformat:1 }}
             </span>
         {% endif %}
     </h3>
@@ -64,13 +62,13 @@
                 </tr>
             </thead>
             <tbody>
-                {% for r in resultados_lista %}
+                {% for r in dim_data.resultados %}
                 <tr>
                     <td style="text-align: center;">
                         <strong>{{ r.texto_eval.codigo_excel }}</strong>
                     </td>
                     <td>
-                        <span style="font-weight: bold;">
+                        <span style="color: {% cycle '#51ff85' '#2196F3' '#ff9800' '#e040fb' %}; font-weight: bold;">
                             {{ r.texto_eval.competencia.nombre_competencia }}
                         </span><br>
                         <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.texto_eval.texto }}</small>
