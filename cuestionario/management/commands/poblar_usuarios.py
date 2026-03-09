@@ -2,15 +2,25 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from cuestionario.models import Trabajador
 
+def get_password_por_empresa(trabajador):
+    passwords = {
+        1: 'Mohala2026',
+        2: 'Permify2026',
+    }
+    return passwords.get(trabajador.empresa_id, 'DefaultPass2026')
+
 class Command(BaseCommand):
     help = 'Crea y vincula usuarios de Django para trabajadores'
 
     def handle(self, *args, **kwargs):
         self.stdout.write('Iniciando vinculación de usuarios...')
-        trabajadores_sin_user = Trabajador.objects.filter(user__isnull=True)
+        
+        trabajadores = Trabajador.objects.all()
         
         contador = 0
-        for t in trabajadores_sin_user:
+        for t in trabajadores:
+            password = get_password_por_empresa(t)
+            
             user, created = User.objects.get_or_create(
                 username=t.email,
                 defaults={
@@ -21,18 +31,17 @@ class Command(BaseCommand):
                 }
             )
             
-            # Sincronizamos nombres y quitamos staff
             user.first_name = t.nombre
             user.last_name = f"{t.apellido_paterno} {t.apellido_materno}"
-            user.set_password('Mohala2026')
+            user.set_password(password)
             user.is_staff = False 
             user.save()
             
-            t.user = user
-            t.save()
+            if not t.user:
+                t.user = user
+                t.save()
             
-            # Mensaje limpio para la consola
-            self.stdout.write(self.style.SUCCESS(f"✅ Usuario procesado: {t.email}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ {t.email} → empresa {t.empresa_id} → password actualizada"))
             contador += 1
 
-        self.stdout.write(self.style.SUCCESS(f'--- Proceso finalizado. {contador} usuarios listos ---'))
+        self.stdout.write(self.style.SUCCESS(f'--- Proceso finalizado. {contador} usuarios actualizados ---'))
