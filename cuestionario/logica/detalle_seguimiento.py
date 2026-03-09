@@ -30,29 +30,16 @@ def detalle_seguimiento(request, trabajador_id):
 
     textos_map = {t.codigo_excel: t for t in textos_qs}
 
-    # Enriquecer cada resultado con su TextosEvaluacion y agrupar por dimensión
-    dimensiones_raw = {}
+    dimensiones_data = {}
     for r in resultados:
         texto_eval = textos_map.get(r.textos_evaluacion_codigo_excel)
         if not texto_eval:
             continue
         r.texto_eval = texto_eval
         dim_nombre = texto_eval.dimension.nombre_dimension
-        if dim_nombre not in dimensiones_raw:
-            dimensiones_raw[dim_nombre] = []
-        dimensiones_raw[dim_nombre].append(r)
-
-    # Calcular promedios por dimensión — incluidos dentro de la estructura para el template
-    dimensiones_data = {}
-    for dim_nombre, lista in dimensiones_raw.items():
-        ids = [r.id_resultado_consolidado for r in lista]
-        avg = ResultadoConsolidado.objects.filter(
-            id_resultado_consolidado__in=ids
-        ).aggregate(Avg('diferencia'))['diferencia__avg']
-        dimensiones_data[dim_nombre] = {
-            'resultados': lista,
-            'promedio': avg,
-        }
+        if dim_nombre not in dimensiones_data:
+            dimensiones_data[dim_nombre] = []
+        dimensiones_data[dim_nombre].append(r)
 
     diff_promedio_total = resultados.aggregate(Avg('diferencia'))['diferencia__avg']
 

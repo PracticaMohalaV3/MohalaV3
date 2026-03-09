@@ -73,7 +73,7 @@ def generar_reporte_global_pdf(request):
         'GlobalCompStyle',
         parent=styles['Normal'],
         fontSize=9,
-        textColor=colors.HexColor('#5e42a6'),
+        textColor=colors.HexColor('#51ff85'),
         fontName='Helvetica-Bold',
         spaceAfter=2,
     )
