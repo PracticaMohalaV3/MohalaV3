@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura
+from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, TextosEvaluacion
 
 @login_required
 def index(request):
@@ -47,32 +47,59 @@ def index(request):
     }
     return render(request, 'cuestionario/index.html', context)
 
+
 @login_required
 def ver_resultados(request, trabajador_id, tipo_evaluacion):
-    # (El resto de la función se mantiene igual)
     trabajador_autenticado = get_object_or_404(Trabajador, user=request.user)
     trabajador_a_ver = get_object_or_404(Trabajador, id_trabajador=trabajador_id)
-    
-    dimension_filtro = request.GET.get('dimension')
+    empresa = trabajador_a_ver.empresa
+
+    dimension_filtro = request.GET.get('dimension_id')
 
     if tipo_evaluacion == 'auto':
-        respuestas = Autoevaluacion.objects.filter(trabajador=trabajador_a_ver)
+        respuestas = Autoevaluacion.objects.filter(
+            trabajador=trabajador_a_ver,
+            estado_finalizacion=True
+        )
         visor_id = trabajador_a_ver.id_trabajador
     else:
         evaluador_id = request.GET.get('evaluador_id')
-        respuestas = EvaluacionJefatura.objects.filter(trabajador_evaluado=trabajador_a_ver, evaluador_id=evaluador_id)
+        respuestas = EvaluacionJefatura.objects.filter(
+            trabajador_evaluado=trabajador_a_ver,
+            evaluador_id=evaluador_id,
+            estado_finalizacion=True
+        )
         visor_id = evaluador_id
 
-    respuestas = respuestas.select_related('codigo_excel__competencia__dimension')
+    codigos = list(respuestas.values_list('textos_evaluacion_codigo_excel', flat=True).distinct())
 
+    textos_qs = TextosEvaluacion.objects.filter(
+        empresa=empresa,
+        codigo_excel__in=codigos
+    ).select_related('dimension', 'competencia')
+
+    # Filtramos por dimensión si viene el parámetro
     if dimension_filtro:
-        respuestas = respuestas.filter(codigo_excel__competencia__dimension__nombre_dimension__icontains=dimension_filtro)
+        textos_qs = textos_qs.filter(dimension__id_dimension=dimension_filtro)
 
+    # Mapa codigo_excel -> objeto TextosEvaluacion
+    textos_map = {t.codigo_excel: t for t in textos_qs}
+
+    # Agrupar respuestas por nombre de dimensión
     dimensiones_data = {}
-    dimensiones_nombres = respuestas.values_list('codigo_excel__competencia__dimension__nombre_dimension', flat=True).distinct()
-    
-    for dim in dimensiones_nombres:
-        dimensiones_data[dim] = respuestas.filter(codigo_excel__competencia__dimension__nombre_dimension=dim)
+    for respuesta in respuestas:
+        codigo = respuesta.textos_evaluacion_codigo_excel
+        texto_eval = textos_map.get(codigo)
+        if not texto_eval:
+            continue  # código no encontrado para esta empresa, se omite
+
+        dim_nombre = texto_eval.dimension.nombre_dimension
+        if dim_nombre not in dimensiones_data:
+            dimensiones_data[dim_nombre] = []
+
+        # Adjuntamos el objeto TextosEvaluacion a la respuesta para el template
+        respuesta.texto_eval = texto_eval
+        dimensiones_data[dim_nombre].append(respuesta)
 
     context = {
         'trabajador': trabajador_a_ver,
@@ -80,6 +107,6 @@ def ver_resultados(request, trabajador_id, tipo_evaluacion):
         'comentario_final': respuestas.first().comentario if respuestas.exists() else "",
         'fecha_cierre': respuestas.first().momento_evaluacion if respuestas.exists() else None,
         'visor_id': visor_id,
-        'tipo_evaluacion': tipo_evaluacion
+        'tipo_evaluacion': tipo_evaluacion,
     }
     return render(request, 'cuestionario/ver_resultados.html', context)

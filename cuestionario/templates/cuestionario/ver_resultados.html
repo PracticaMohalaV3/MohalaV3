@@ -38,10 +38,10 @@
                     <tr>
                         <td>
                             <span style="color: {% if 'Funcional' in dim_nombre %}#2196F3{% else %}#51ff85{% endif %}; font-weight: bold;">
-                                [{{ r.codigo_excel.codigo_excel }}]
+                                [{{ r.texto_eval.codigo_excel }}]
                             </span> 
-                            <strong>{{ r.codigo_excel.competencia.nombre_competencia }}</strong><br>
-                            <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.codigo_excel.texto }}</small>
+                            <strong>{{ r.texto_eval.competencia.nombre_competencia }}</strong><br>
+                            <small style="opacity: 0.7; display: block; margin-top: 4px;">{{ r.texto_eval.texto }}</small>
                         </td>
                         <td style="text-align: center; vertical-align: middle;">
                             <span style="background: {% if 'Funcional' in dim_nombre %}rgba(33, 150, 243, 0.2){% else %}rgba(81, 255, 133, 0.2){% endif %}; 
