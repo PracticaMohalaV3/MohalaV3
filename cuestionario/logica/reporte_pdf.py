@@ -110,6 +110,7 @@ def generar_pdf_detalle(request, trabajador_id):
     
     info_data = [
         ['Colaborador:', f"{trabajador.nombre} {trabajador.apellido_paterno} {trabajador.apellido_materno}"],
+        ['Empresa:', trabajador.empresa.nombre_empresa],
         ['Cargo:', trabajador.cargo.nombre_cargo],
         ['Nivel:', trabajador.nivel_jerarquico.nombre_nivel_jerarquico],
         ['Jefatura Directa:', jefe_directo_nombre],
