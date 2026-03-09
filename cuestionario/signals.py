@@ -1,7 +1,11 @@
-from django.core.management.base import BaseCommand
+from django.db import models
 from django.contrib.auth.models import User
-from cuestionario.models import Trabajador
+from django.db.models.signals import post_save 
+from django.dispatch import receiver 
 
+# Helper para obtener la password según empresa
+# Empresa 1 (Mohala SpA) → Mohala2026
+# Empresa 2 (Permify SpA) → Permify2026
 def get_password_por_empresa(trabajador):
     passwords = {
         1: 'Mohala2026',
@@ -9,37 +13,15 @@ def get_password_por_empresa(trabajador):
     }
     return passwords.get(trabajador.empresa_id, 'DefaultPass2026')
 
-class Command(BaseCommand):
-    help = 'Crea y vincula usuarios de Django para trabajadores'
-
-    def handle(self, *args, **kwargs):
-        self.stdout.write('Iniciando vinculación de usuarios...')
-        trabajadores_sin_user = Trabajador.objects.filter(user__isnull=True)
+@receiver(post_save, sender=Trabajador)
+def crear_usuario_automatico(sender, instance, created, **kwargs):
+    if created and not instance.user:
+        password = get_password_por_empresa(instance)
         
-        contador = 0
-        for t in trabajadores_sin_user:
-            password = get_password_por_empresa(t)
-            
-            user, created = User.objects.get_or_create(
-                username=t.email,
-                defaults={
-                    'email': t.email, 
-                    'first_name': t.nombre,
-                    'last_name': f"{t.apellido_paterno} {t.apellido_materno}",
-                    'is_staff': False
-                }
-            )
-            
-            user.first_name = t.nombre
-            user.last_name = f"{t.apellido_paterno} {t.apellido_materno}"
-            user.set_password(password)
-            user.is_staff = False 
-            user.save()
-            
-            t.user = user
-            t.save()
-            
-            self.stdout.write(self.style.SUCCESS(f"✅ Usuario procesado: {t.email} (empresa {t.empresa_id})"))
-            contador += 1
-
-        self.stdout.write(self.style.SUCCESS(f'--- Proceso finalizado. {contador} usuarios listos ---'))
+        nuevo_user = User.objects.create_user(
+            username=instance.email,
+            email=instance.email,
+            password=password
+        )
+        instance.user = nuevo_user
+        instance.save()
