@@ -30,9 +30,9 @@ urlpatterns = [
          reporte_global.ver_reporte_global_pdf, 
          name='ver_reporte_global_pdf'),
 
-     path('biblioteca/ver-archivo/<int:biblioteca_id>/', 
-          manejo_archivos.ver_archivo_biblioteca, 
-          name='ver_archivo_biblioteca'),
+    path('biblioteca/ver-archivo/<int:biblioteca_id>/', 
+         manejo_archivos.ver_archivo_biblioteca, 
+         name='ver_archivo_biblioteca'),
     
     # RUTAS GEMINI
     path('gemini/', gemini_admin.panel_gemini, name='panel_gemini'),
@@ -45,7 +45,7 @@ urlpatterns = [
          views.cuestionario_autoevaluacion, 
          name='autoevaluacion_inicio'),
     
-    path('autoevaluacion/<int:trabajador_id>/<str:dimension>/', 
+    path('autoevaluacion/<int:trabajador_id>/<int:dimension_id>/', 
          views.cuestionario_autoevaluacion, 
          name='autoevaluacion'),
 
@@ -57,7 +57,7 @@ urlpatterns = [
          views.cuestionario_jefatura, 
          name='evaluacion_jefe_inicio'),
     
-    path('evaluacion_jefe/<int:evaluador_id>/<int:evaluado_id>/<str:dimension>/', 
+    path('evaluacion_jefe/<int:evaluador_id>/<int:evaluado_id>/<int:dimension_id>/', 
          views.cuestionario_jefatura, 
          name='evaluacion_jefe'),
 

@@ -11,29 +11,21 @@
     </header>
 
     <div class="features">
+        {% for item in dimensiones_estado %}
         <section style="border: 1px solid rgba(255,255,255,0.1); padding: 2em; border-radius: 8px; background: rgba(255,255,255,0.02); text-align: center;">
-            <h3 style="color: #51ff85;">1. Organizacionales</h3>
+            <h3 style="color: {% if forloop.first %}#51ff85{% else %}#2196F3{% endif %};">
+                {{ forloop.counter }}. {{ item.dimension.nombre_dimension }}
+            </h3>
             <p>Competencias transversales alineadas a la cultura y valores de la compañía</p>
             
-            {% if hecho_org %}
-                <p style="color: #51ff85; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
-                <a href="{% url 'ver_resultados' trabajador.id_trabajador 'auto' %}?dimension=Organizacional" class="button fit">Ver Mis Respuestas</a>
+            {% if item.hecho %}
+                <p style="color: {% if forloop.first %}#51ff85{% else %}#2196F3{% endif %}; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
+                <a href="{% url 'ver_resultados' trabajador.id_trabajador 'auto' %}?dimension_id={{ item.dimension.id_dimension }}" class="button fit">Ver Mis Respuestas</a>
             {% else %}
-                <a href="{% url 'autoevaluacion' trabajador.id_trabajador 'Organizacional' %}" class="button primary fit">Responder Organizacionales</a>
+                <a href="{% url 'autoevaluacion' trabajador.id_trabajador item.dimension.id_dimension %}" class="button primary fit">Responder {{ item.dimension.nombre_dimension }}</a>
             {% endif %}
         </section>
-
-        <section style="border: 1px solid rgba(255,255,255,0.1); padding: 2em; border-radius: 8px; background: rgba(255,255,255,0.02); text-align: center;">
-            <h3 style="color: #2196F3;">2. Funcionales</h3>
-            <p>Competencias específicas relacionadas con los conocimientos técnicos del cargo.</p>
-            
-            {% if hecho_fun %}
-                <p style="color: #2196F3; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
-                <a href="{% url 'ver_resultados' trabajador.id_trabajador 'auto' %}?dimension=Funcional" class="button fit">Ver Mis Respuestas</a>
-            {% else %}
-                <a href="{% url 'autoevaluacion' trabajador.id_trabajador 'Funcional' %}" class="button primary fit">Responder Funcionales</a>
-            {% endif %}
-        </section>
+        {% endfor %}
     </div>
 
     <hr />

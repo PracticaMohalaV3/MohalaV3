@@ -12,29 +12,21 @@
     </header>
 
     <div class="features">
+        {% for item in dimensiones_estado %}
         <section style="border: 1px solid rgba(255,255,255,0.1); padding: 2em; border-radius: 8px; background: rgba(255,255,255,0.02); text-align: center;">
-            <h3 style="color: #51ff85;">1. Organizacionales</h3>
-            <p>Competencias transversales alineadas a la cultura y valores de la compañía.</p>
-            
-            {% if hecho_org %}
-                <p style="color: #51ff85; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
-                <a href="{% url 'ver_resultados' evaluado.id_trabajador 'jefe' %}?evaluador_id={{ evaluador.id_trabajador }}&dimension=Organizacional" class="button fit">Ver Calificaciones</a>
-            {% else %}
-                <a href="{% url 'evaluacion_jefe' evaluador.id_trabajador evaluado.id_trabajador 'Organizacional' %}" class="button primary fit">Evaluar Organizacionales</a>
-            {% endif %}
-        </section>
-
-        <section style="border: 1px solid rgba(255,255,255,0.1); padding: 2em; border-radius: 8px; background: rgba(255,255,255,0.02); text-align: center;">
-            <h3 style="color: #2196F3;">2. Funcionales</h3>
+            <h3 style="color: {% if forloop.first %}#51ff85{% else %}#2196F3{% endif %};">
+                {{ forloop.counter }}. {{ item.dimension.nombre_dimension }}
+            </h3>
             <p>Competencias específicas relacionadas con los conocimientos técnicos del cargo.</p>
             
-            {% if hecho_fun %}
-                <p style="color: #2196F3; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
-                <a href="{% url 'ver_resultados' evaluado.id_trabajador 'jefe' %}?evaluador_id={{ evaluador.id_trabajador }}&dimension=Funcional" class="button fit">Ver Calificaciones</a>
+            {% if item.hecho %}
+                <p style="color: {% if forloop.first %}#51ff85{% else %}#2196F3{% endif %}; font-weight: bold; margin-bottom: 1em;">✅ Sección Completada</p>
+                <a href="{% url 'ver_resultados' evaluado.id_trabajador 'jefe' %}?evaluador_id={{ evaluador.id_trabajador }}&dimension_id={{ item.dimension.id_dimension }}" class="button fit">Ver Calificaciones</a>
             {% else %}
-                <a href="{% url 'evaluacion_jefe' evaluador.id_trabajador evaluado.id_trabajador 'Funcional' %}" class="button primary fit">Evaluar Funcionales</a>
+                <a href="{% url 'evaluacion_jefe' evaluador.id_trabajador evaluado.id_trabajador item.dimension.id_dimension %}" class="button primary fit">Evaluar {{ item.dimension.nombre_dimension }}</a>
             {% endif %}
         </section>
+        {% endfor %}
     </div>
 
     <hr />
