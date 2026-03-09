@@ -1,11 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save 
-from django.dispatch import receiver 
+from django.dispatch import receiver
+from cuestionario.models import Trabajador 
 
-# Helper para obtener la password según empresa
-# Empresa 1 (Mohala SpA) → Mohala2026
-# Empresa 2 (Permify SpA) → Permify2026
 def get_password_por_empresa(trabajador):
     passwords = {
         1: 'Mohala2026',
