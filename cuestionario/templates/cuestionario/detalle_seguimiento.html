@@ -108,17 +108,6 @@
     </div>
     {% endfor %}
 
-    <div style="background: rgba(255,255,255,0.05); padding: 1.5em; border-radius: 8px; margin-top: 2em; text-align: center;">
-        <strong>Diferencia promedio total: </strong>
-        {% if diff_promedio_total is not None %}
-            <span style="{% if diff_promedio_total > 0 %}color: #51ff85;{% elif diff_promedio_total < 0 %}color: #ff5151;{% endif %} font-weight: bold;">
-                {% if diff_promedio_total > 0 %}+{% endif %}{{ diff_promedio_total|floatformat:1 }}
-            </span>
-        {% else %}
-            <span style="opacity: 0.5;">N/A</span>
-        {% endif %}
-    </div>
-
     <!-- BOTONES PARA REPORTES -->
     <div style="text-align: center; margin-top: 3em;">
         <a href="{% url 'generar_pdf_detalle' trabajador.id_trabajador %}" 

@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado
+from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado, TextosEvaluacion
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -23,25 +23,40 @@ def generar_pdf_detalle(request, trabajador_id):
     except Trabajador.DoesNotExist:
         return redirect('seguimiento_admin')
     
+    empresa = trabajador.empresa
+
     resultados = ResultadoConsolidado.objects.filter(
         trabajador=trabajador
-    ).select_related('codigo_excel', 'competencia', 'dimension').order_by('codigo_excel__id_textos_evaluacion')
-    
-    resultados_organizacionales = resultados.filter(dimension__nombre_dimension__icontains='Organizacional')
-    resultados_funcionales = resultados.filter(dimension__nombre_dimension__icontains='Funcional')
-    
+    ).order_by('textos_evaluacion_codigo_excel')
+
+    codigos = list(resultados.values_list('textos_evaluacion_codigo_excel', flat=True).distinct())
+    textos_qs = TextosEvaluacion.objects.filter(
+        empresa=empresa,
+        codigo_excel__in=codigos
+    ).select_related('dimension', 'competencia')
+    textos_map = {t.codigo_excel: t for t in textos_qs}
+
+    resultados_por_dim = {}
+    for r in resultados:
+        texto_eval = textos_map.get(r.textos_evaluacion_codigo_excel)
+        if not texto_eval:
+            continue
+        r.texto_eval = texto_eval
+        dim_nombre = texto_eval.dimension.nombre_dimension
+        if dim_nombre not in resultados_por_dim:
+            resultados_por_dim[dim_nombre] = []
+        resultados_por_dim[dim_nombre].append(r)
+
     auto = Autoevaluacion.objects.filter(trabajador=trabajador, estado_finalizacion=True).first()
     jefe = EvaluacionJefatura.objects.filter(trabajador_evaluado=trabajador, estado_finalizacion=True).first()
     
     timestamp_auto = auto.momento_evaluacion.strftime("%d/%m/%Y %H:%M") if auto else "Pendiente"
     timestamp_jefe = jefe.momento_evaluacion.strftime("%d/%m/%Y %H:%M") if jefe else "N/A"
     
-    # Crear el PDF
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
     
-    # Estilos
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'CustomTitle',
@@ -51,7 +66,6 @@ def generar_pdf_detalle(request, trabajador_id):
         spaceAfter=30,
         alignment=TA_CENTER
     )
-    
     heading_style = ParagraphStyle(
         'CustomHeading',
         parent=styles['Heading2'],
@@ -69,7 +83,7 @@ def generar_pdf_detalle(request, trabajador_id):
         'CompStyle',
         parent=styles['Normal'],
         fontSize=9,
-        textColor=colors.HexColor('#5e42a6'),
+        textColor=colors.HexColor('#51ff85'),
         fontName='Helvetica-Bold',
         spaceAfter=2,
     )
@@ -89,7 +103,6 @@ def generar_pdf_detalle(request, trabajador_id):
         leading=9,
     )
     
-    # Título
     elements.append(Paragraph("Reporte de Evaluación de Desempeño", title_style))
     elements.append(Spacer(1, 0.2*inch))
     
@@ -118,79 +131,46 @@ def generar_pdf_detalle(request, trabajador_id):
     
     elements.append(info_table)
     elements.append(Spacer(1, 0.3*inch))
+
+    for dim_idx, (dim_nombre, lista) in enumerate(resultados_por_dim.items()):
+        dim_heading = heading_style if dim_idx == 0 else func_heading_style
+        dim_comp_style = comp_style if dim_idx == 0 else comp_func_style
+
+        elements.append(Paragraph(f"Dimensión: {dim_nombre}", dim_heading))
+
+        dim_data = [['Código', 'Competencia / Indicador', 'AutoEv', 'Ev. Jefe', 'Diferencia']]
+        for r in lista:
+            celda = [
+                Paragraph(escape(r.texto_eval.competencia.nombre_competencia), dim_comp_style),
+                Paragraph(escape(r.texto_eval.texto), indicator_style),
+            ]
+            dim_data.append([
+                r.texto_eval.codigo_excel,
+                celda,
+                str(r.puntaje_autoev),
+                str(r.puntaje_jefe) if r.puntaje_jefe > 0 else 'N/A',
+                f"{'+' if r.diferencia > 0 else ''}{int(r.diferencia)}"
+            ])
+
+        dim_table = Table(dim_data, colWidths=[0.7*inch, 3.2*inch, 0.7*inch, 0.7*inch, 0.8*inch])
+        dim_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#5e42a6')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('VALIGN', (1, 1), (1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+        ]))
+
+        elements.append(dim_table)
+        elements.append(Spacer(1, 0.3*inch))
     
-    # Tabla Organizacional
-    elements.append(Paragraph("Dimensión: Organizacional", heading_style))
-    
-    org_data = [['Código', 'Competencia / Indicador', 'AutoEv', 'Ev. Jefe', 'Diferencia']]
-    for r in resultados_organizacionales:
-        celda = [
-            Paragraph(escape(r.competencia.nombre_competencia), comp_style),
-            Paragraph(escape(r.codigo_excel.texto), indicator_style),
-        ]
-        org_data.append([
-            r.codigo_excel.codigo_excel,
-            celda,
-            str(r.puntaje_autoev),
-            str(r.puntaje_jefe) if r.puntaje_jefe > 0 else 'N/A',
-            f"{'+' if r.diferencia > 0 else ''}{int(r.diferencia)}"
-        ])
-    
-    org_table = Table(org_data, colWidths=[0.7*inch, 3.2*inch, 0.7*inch, 0.7*inch, 0.8*inch])
-    org_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#5e42a6')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('VALIGN', (1, 1), (1, -1), 'TOP'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
-    ]))
-    
-    elements.append(org_table)
-    elements.append(Spacer(1, 0.3*inch))
-    
-    # Tabla Funcional
-    elements.append(Paragraph("Dimensión: Funcional", func_heading_style))
-    
-    func_data = [['Código', 'Competencia / Indicador', 'AutoEv', 'Ev. Jefe', 'Diferencia']]
-    for r in resultados_funcionales:
-        celda = [
-            Paragraph(escape(r.competencia.nombre_competencia), comp_func_style),
-            Paragraph(escape(r.codigo_excel.texto), indicator_style),
-        ]
-        func_data.append([
-            r.codigo_excel.codigo_excel,
-            celda,
-            str(r.puntaje_autoev),
-            str(r.puntaje_jefe) if r.puntaje_jefe > 0 else 'N/A',
-            f"{'+' if r.diferencia > 0 else ''}{int(r.diferencia)}"
-        ])
-    
-    func_table = Table(func_data, colWidths=[0.7*inch, 3.2*inch, 0.7*inch, 0.7*inch, 0.8*inch])
-    func_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#5e42a6')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('VALIGN', (1, 1), (1, -1), 'TOP'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
-    ]))
-    
-    elements.append(func_table)
-    
-    # Construir PDF
     doc.build(elements)
     
     pdf = buffer.getvalue()
