@@ -466,20 +466,18 @@ class ResultadoConsolidado(models.Model):
         on_delete=models.DO_NOTHING, 
         db_column='trabajador_id_trabajador'
     )
-    
     autoevaluacion = models.ForeignKey(
         'Autoevaluacion',
         on_delete=models.DO_NOTHING,
         db_column='autoevaluacion_id_autoevaluacion'
     )
-    
     evaluacion_jefatura = models.ForeignKey(
         'EvaluacionJefatura',
         on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
         db_column='evaluacion_jefatura_id_evaluacion_jefatura'
     )
-    
-    # FK compuesta a TEXTOS_EVALUACION
     textos_evaluacion_codigo_excel = models.CharField(max_length=10)
     textos_evaluacion_empresa = models.ForeignKey(
         'Empresa',
