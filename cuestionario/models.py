@@ -135,7 +135,7 @@ class Escala(models.Model):
         db_table = 'ESCALA'
 
     def __str__(self):
-        return f"{self.id_escala} - {self.descripcion}"
+        return f"{self.valor} - {self.descripcion}"
 
 # =========================
 # Tabla Dimension
