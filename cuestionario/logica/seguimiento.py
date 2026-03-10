@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg
-from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado
+from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado, Empresa
 
 @login_required
 def panel_seguimiento(request):
@@ -17,7 +17,6 @@ def panel_seguimiento(request):
     jefaturas_pendientes = 0
 
     for t in trabajadores:
-        # Autoevaluación
         t.auto_lista = Autoevaluacion.objects.filter(trabajador=t, estado_finalizacion=True).exists()
         if t.auto_lista:
             autos_listas += 1
@@ -25,7 +24,6 @@ def panel_seguimiento(request):
             autos_pendientes += 1
             total_por_realizar += 1
         
-        # Jefatura
         if t.id_jefe_directo:
             t.tiene_jefe = True
             t.jefe_lista = EvaluacionJefatura.objects.filter(trabajador_evaluado=t, estado_finalizacion=True).exists()
@@ -38,7 +36,6 @@ def panel_seguimiento(request):
             t.tiene_jefe = False
             t.jefe_lista = False
 
-        # Brecha
         t.diff_promedio = None
         if t.auto_lista and (not t.tiene_jefe or t.jefe_lista):
             res = ResultadoConsolidado.objects.filter(trabajador=t).aggregate(Avg('diferencia'))
@@ -51,5 +48,6 @@ def panel_seguimiento(request):
         'autos_pendientes': autos_pendientes,
         'jefaturas_listas': jefaturas_listas,
         'jefaturas_pendientes': jefaturas_pendientes,
+        'empresas': Empresa.objects.filter(empresa_activa=True), 
     }
     return render(request, 'cuestionario/seguimiento.html', context)

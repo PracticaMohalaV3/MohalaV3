@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from cuestionario.models import (Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado, ReporteGlobal, TextosEvaluacion)
+from cuestionario.models import (Trabajador, Autoevaluacion, EvaluacionJefatura, ResultadoConsolidado, ReporteGlobal, TextosEvaluacion, Empresa)
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -20,13 +20,28 @@ def generar_reporte_global_pdf(request):
     if not request.user.is_superuser:
         return redirect('index')
 
-    trabajadores = Trabajador.objects.filter(
+    empresa_id = request.GET.get('empresa_id')
+    empresa_obj = None
+
+    if empresa_id:
+        try:
+            empresa_obj = Empresa.objects.get(id_empresa=empresa_id)
+        except Empresa.DoesNotExist:
+            return HttpResponse("Empresa no encontrada.", status=404)
+
+    trabajadores_qs = Trabajador.objects.filter(
         resultadoconsolidado__isnull=False
     ).select_related(
         'cargo',
         'nivel_jerarquico',
-        'id_jefe_directo'
-    ).distinct().order_by('apellido_paterno', 'nombre')
+        'id_jefe_directo',
+        'empresa'
+    ).distinct()
+
+    if empresa_obj:
+        trabajadores_qs = trabajadores_qs.filter(empresa=empresa_obj)
+
+    trabajadores = trabajadores_qs.order_by('apellido_paterno', 'nombre')
 
     if not trabajadores.exists():
         return HttpResponse("No hay trabajadores con evaluaciones completadas.", status=404)
@@ -93,11 +108,11 @@ def generar_reporte_global_pdf(request):
         leading=9,
     )
 
-    # Crear el reporte en BD primero para obtener el ID
     reporte_global_temp = ReporteGlobal.objects.create(
         contenido_pdf=b'',
         total_trabajadores=trabajadores.count(),
-        periodo=2026
+        periodo=2026,
+        empresa=empresa_obj
     )
 
     # PORTADA
@@ -105,6 +120,8 @@ def generar_reporte_global_pdf(request):
     elements.append(Paragraph("REPORTE GLOBAL DE EVALUACIONES DE DESEMPEÑO", portada_style))
     elements.append(Spacer(1, 0.5 * inch))
     elements.append(Paragraph(f"ID Reporte: #{reporte_global_temp.id_reporte_global}", title_style))
+    if empresa_obj:
+        elements.append(Paragraph(f"Empresa: {empresa_obj.nombre_empresa}", title_style))
     elements.append(Paragraph(f"Total de Colaboradores: {trabajadores.count()}", title_style))
     elements.append(Paragraph(f"Fecha de Generación: {datetime.now().strftime('%d/%m/%Y %H:%M')}", title_style))
     elements.append(Paragraph("Periodo: 2026", title_style))
@@ -130,7 +147,6 @@ def generar_reporte_global_pdf(request):
         ).select_related('dimension', 'competencia')
         textos_map = {t.codigo_excel: t for t in textos_qs}
 
-        # Enriquecer resultados y separar por dimensión
         resultados_por_dim = {}
         for r in resultados:
             texto_eval = textos_map.get(r.textos_evaluacion_codigo_excel)
@@ -233,7 +249,6 @@ def generar_reporte_global_pdf(request):
     pdf_bytes = buffer.getvalue()
     buffer.close()
 
-    # Actualizar el reporte con el PDF generado
     reporte_global_temp.contenido_pdf = pdf_bytes
     reporte_global_temp.save()
 

@@ -13,6 +13,13 @@ class Biblioteca(models.Model):
     archivo = models.BinaryField(editable=True)
     estado_carga = models.BooleanField(default=False)
     fecha_carga = models.DateTimeField(auto_now_add=True)
+    empresa = models.ForeignKey(
+        'Empresa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='EMPRESA_ID_EMPRESA'
+    )
 
     class Meta:
         managed = False
@@ -30,6 +37,13 @@ class ReporteGlobal(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     total_trabajadores = models.IntegerField(default=0)
     periodo = models.IntegerField(default=2026)
+    empresa = models.ForeignKey(
+        'Empresa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='EMPRESA_ID_EMPRESA'
+    )
 
     class Meta:
         db_table = 'REPORTE_GLOBAL'
@@ -54,6 +68,13 @@ class PromptGemini(models.Model):
         null=True,
         blank=True,
         db_column='REPORTE_GLOBAL_ID'
+    )
+    empresa = models.ForeignKey(
+        'Empresa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='EMPRESA_ID_EMPRESA'
     )
 
     class Meta:

@@ -85,9 +85,16 @@
     
     {% if user.is_superuser %}
     <li>
-        <a href="{% url 'generar_reporte_global_pdf' %}" class="button primary">
-            📊 Generar Reporte Respuestas
-        </a>
+        <form method="GET" action="{% url 'generar_reporte_global_pdf' %}" style="display: inline-flex; align-items: center; gap: 0.5em;">
+            <select name="empresa_id" required
+                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px;">
+                <option value="">-- Empresa --</option>
+                {% for empresa in empresas %}
+                    <option value="{{ empresa.id_empresa }}">{{ empresa.nombre_empresa }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="button primary">📊 Generar Reporte Respuestas</button>
+        </form>
     </li>
     
     <li>
