@@ -97,7 +97,7 @@ class ResultadoConsolidadoAdmin(admin.ModelAdmin):
     list_display = ('trabajador', 'textos_evaluacion_codigo_excel', 'puntaje_jefe', 'puntaje_autoev', 'diferencia', 'periodo')
     list_filter = ('periodo', 'trabajador')
     readonly_fields = ('diferencia',)
-    ordering = ('id_resultado',)
+    ordering = ('id_resultado_consolidado',)
 
 @admin.register(DescripcionRespuesta)
 class DescripcionRespuestaAdmin(admin.ModelAdmin):
