@@ -17,6 +17,16 @@
         <form method="POST" action="{% url 'editar_prompt' %}">
             {% csrf_token %}
             <div class="row gtr-uniform">
+                <div class="col-12" style="margin-bottom: 1em;">
+                    <label for="empresa_id"><strong>Empresa:</strong></label>
+                    <select name="empresa_id" id="empresa_id" required
+                            style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; width: 100%;">
+                        <option value="">-- Selecciona empresa --</option>
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa.id_empresa }}">{{ empresa.nombre_empresa }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <div class="col-12">
                     <label for="prompt_texto"><strong>Escribe el prompt para la IA:</strong></label>
                     <textarea name="prompt_texto" id="prompt_texto" rows="8" 
@@ -41,10 +51,11 @@
                     <tr>
                         <th style="width: 8%;">ID</th>
                         <th style="width: 12%;">Fecha</th>
-                        <th style="width: 40%;">Prompt</th>
+                        <th style="width: 15%;">Empresa</th>
+                        <th style="width: 30%;">Prompt</th>
                         <th style="width: 10%;">Estado</th>
-                        <th style="width: 15%;">Generar Informe</th>
-                        <th style="width: 15%;">Ver Informe</th>
+                        <th style="width: 12%;">Generar Informe</th>
+                        <th style="width: 13%;">Ver Informe</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,10 +63,15 @@
                     <tr>
                         <td style="text-align: center;"><strong>#{{ prompt.id_prompt }}</strong></td>
                         <td>{{ prompt.timestamp|date:"d/m/Y H:i" }}</td>
+                        <td style="text-align: center;">
+                            {% if prompt.empresa %}
+                                {{ prompt.empresa.nombre_empresa }}
+                            {% else %}
+                                <span style="opacity: 0.3;">---</span>
+                            {% endif %}
+                        </td>
                         <td>
-                            <small style="opacity: 0.8;">
-                                {{ prompt.prompt_texto }}
-                            </small>
+                            <small style="opacity: 0.8;">{{ prompt.prompt_texto }}</small>
                         </td>
                         <td style="text-align: center;">
                             {% if prompt.pdf_generado %}

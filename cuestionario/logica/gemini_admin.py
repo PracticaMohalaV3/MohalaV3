@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from cuestionario.models import PromptGemini, Biblioteca, ReporteGlobal
+from cuestionario.models import PromptGemini, Biblioteca, ReporteGlobal, Empresa
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -13,10 +13,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_JUSTIFY
 from io import BytesIO
 
-# Cargar variables de entornoo
 load_dotenv()
-
-# Configurar Gemini
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 
@@ -26,15 +23,13 @@ def panel_gemini(request):
     if not request.user.is_superuser:
         return redirect('index')
     
-    # Obtener el último prompt usado
     ultimo_prompt = PromptGemini.objects.first()
-    
-    # Obtener historial (últimos 20)
     historial = PromptGemini.objects.all()[:20]
     
     context = {
         'ultimo_prompt': ultimo_prompt,
-        'historial': historial
+        'historial': historial,
+        'empresas': Empresa.objects.filter(empresa_activa=True),  # ← AGREGADO
     }
     
     return render(request, 'cuestionario/gemini_admin.html', context)
@@ -48,12 +43,13 @@ def editar_prompt(request):
     
     if request.method == 'POST':
         prompt_texto = request.POST.get('prompt_texto', '')
+        empresa_id = request.POST.get('empresa_id')  
         
         if prompt_texto.strip():
             PromptGemini.objects.create(
-                prompt_texto=prompt_texto
+                prompt_texto=prompt_texto,
+                empresa_id=empresa_id if empresa_id else None 
             )
-            
             return redirect('panel_gemini')
     
     return redirect('panel_gemini')
@@ -70,23 +66,27 @@ def generar_informe_gemini(request, prompt_id):
     except PromptGemini.DoesNotExist:
         return HttpResponse("Prompt no encontrado", status=404)
     
-    # Si ya existe el PDF guardado, devolverlo directamente sin llamar a Gemini
     if prompt_obj.archivo_pdf:
         response_http = HttpResponse(prompt_obj.archivo_pdf, content_type='application/pdf')
         response_http['Content-Disposition'] = f'inline; filename="informe_gemini_{prompt_id}.pdf"'
         return response_http
     
     try:
-        # Usar gemini-2.5-flash (capa gratuita)
         model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-        # Cargar documentos de Biblioteca con estado_carga=True
-        docs_biblioteca = Biblioteca.objects.filter(estado_carga=True)
+        # CAMBIO: filtrar Biblioteca y ReporteGlobal por empresa del prompt
+        if prompt_obj.empresa:
+            docs_biblioteca = Biblioteca.objects.filter(
+                estado_carga=True,
+                empresa=prompt_obj.empresa
+            )
+            ultimo_reporte = ReporteGlobal.objects.filter(
+                empresa=prompt_obj.empresa
+            ).order_by('-timestamp').first()
+        else:
+            docs_biblioteca = Biblioteca.objects.filter(estado_carga=True)
+            ultimo_reporte = ReporteGlobal.objects.order_by('-timestamp').first()
 
-        # Cargar último reporte global generado
-        ultimo_reporte = ReporteGlobal.objects.order_by('-timestamp').first()
-
-        # Construir lista de partes: primero los PDFs, luego el prompt
         partes = []
         for doc in docs_biblioteca:
             partes.append({'mime_type': 'application/pdf', 'data': bytes(doc.archivo)})
@@ -94,21 +94,17 @@ def generar_informe_gemini(request, prompt_id):
             partes.append({'mime_type': 'application/pdf', 'data': bytes(ultimo_reporte.contenido_pdf)})
         partes.append(prompt_obj.prompt_texto)
 
-        # Generar respuesta con contexto
         response = model.generate_content(partes)
         respuesta_texto = response.text
         
-        # Guardar respuesta en la BD
         prompt_obj.respuesta_gemini = respuesta_texto
         prompt_obj.pdf_generado = True
         prompt_obj.save()
         
-        # Generar PDF
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1*inch, bottomMargin=1*inch, leftMargin=1*inch, rightMargin=1*inch)
         elements = []
         
-        # Estilos
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -116,9 +112,8 @@ def generar_informe_gemini(request, prompt_id):
             fontSize=16,
             textColor=colors.HexColor('#5e42a6'),
             spaceAfter=20,
-            alignment=1  # Center
+            alignment=1
         )
-        
         body_style = ParagraphStyle(
             'CustomBody',
             parent=styles['BodyText'],
@@ -127,7 +122,6 @@ def generar_informe_gemini(request, prompt_id):
             spaceAfter=12,
             leading=14
         )
-        
         subtitle_style = ParagraphStyle(
             'Subtitle',
             parent=styles['Heading2'],
@@ -137,76 +131,55 @@ def generar_informe_gemini(request, prompt_id):
             spaceBefore=15
         )
         
-        # Título
         elements.append(Paragraph("Informe Generado por Gemini AI", title_style))
         elements.append(Spacer(1, 0.2*inch))
         
-        # Fecha
         fecha_generacion = prompt_obj.timestamp.strftime("%d/%m/%Y %H:%M")
         elements.append(Paragraph(f"<b>Fecha de generación:</b> {fecha_generacion}", body_style))
+        if prompt_obj.empresa:
+            elements.append(Paragraph(f"<b>Empresa:</b> {prompt_obj.empresa.nombre_empresa}", body_style))
         elements.append(Spacer(1, 0.1*inch))
         
-        # Prompt usado
         elements.append(Paragraph("Prompt Utilizado", subtitle_style))
-        
-        # Escapar caracteres especiales en el prompt
         prompt_escapado = prompt_obj.prompt_texto.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
         elements.append(Paragraph(prompt_escapado, body_style))
         elements.append(Spacer(1, 0.3*inch))
         
-        # Respuesta de Gemini
         elements.append(Paragraph("Informe Generado", title_style))
         elements.append(Spacer(1, 0.1*inch))
         
-        # Procesar la respuesta con manejo de caracteres especiales
         lineas = respuesta_texto.split('\n')
         for linea in lineas:
             if linea.strip():
-                # Escapar caracteres especiales HTML
                 linea = linea.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-                
-                # Limpiar markdown
                 linea_limpia = linea.replace('**', '<b>').replace('**', '</b>')
                 linea_limpia = linea_limpia.replace('*', '<i>').replace('*', '</i>')
                 linea_limpia = linea_limpia.replace('#', '')
-                
                 try:
-                    # Detectar si es un título (empieza con ##)
                     if linea.strip().startswith('##'):
                         elements.append(Paragraph(linea_limpia.strip(), subtitle_style))
                     else:
                         elements.append(Paragraph(linea_limpia, body_style))
                 except Exception as e:
-                    # Si falla, agregar como texto plano simple
                     print(f"Error procesando línea: {str(e)}")
                     continue
         
-        # Construir PDF
         doc.build(elements)
-        
-        # Crear respuesta
         pdf = buffer.getvalue()
         buffer.close()
         
-        # NUEVO: Guardar el PDF en la base de datos
         prompt_obj.archivo_pdf = pdf
         prompt_obj.save()
         
         response_http = HttpResponse(pdf, content_type='application/pdf')
         response_http['Content-Disposition'] = f'inline; filename="informe_gemini_{prompt_id}.pdf"'
-        
         return response_http
         
     except Exception as e:
-        # Mostrar el error
         error_msg = f"ERROR al generar informe: {str(e)}"
         print(error_msg)
-        
-        # Guardar error en BD
         prompt_obj.respuesta_gemini = error_msg
         prompt_obj.save()
-        
-        # Devolver error como HTML
         return HttpResponse(f"""
             <html>
             <body style="font-family: Arial; padding: 40px;">
@@ -247,7 +220,7 @@ def listar_modelos(request):
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}")
 
-    
+
 @login_required
 def ver_informe_gemini(request, prompt_id):
     """Ver el PDF generado guardado en la BD"""
