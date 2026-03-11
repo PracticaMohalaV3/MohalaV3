@@ -3,6 +3,23 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save 
 from django.dispatch import receiver 
 
+# =========================
+# Tabla Empresa
+# =========================
+class Empresa(models.Model):
+    id_empresa = models.AutoField(primary_key=True)
+    nombre_empresa = models.CharField(max_length=100)
+    rut_empresa = models.CharField(max_length=20, unique=True)
+    empresa_activa = models.BooleanField(default=False)
+    registrada_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'EMPRESA'
+
+    def __str__(self):
+        return f"{self.id_empresa} - {self.nombre_empresa} ({'Activa' if self.empresa_activa else 'Inactiva'})"
+
 
 # ==========================================================
 # Biblioteca
@@ -61,6 +78,14 @@ class PromptGemini(models.Model):
     respuesta_gemini = models.TextField(null=True, blank=True)
     pdf_generado = models.BooleanField(default=False)
     archivo_pdf = models.BinaryField(null=True, blank=True)
+
+    empresa = models.ForeignKey(
+        'Empresa',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        db_column='EMPRESA_ID_EMPRESA'
+    )
     
     reporte_global = models.ForeignKey(
         ReporteGlobal,
@@ -69,13 +94,6 @@ class PromptGemini(models.Model):
         blank=True,
         db_column='REPORTE_GLOBAL_ID'
     )
-    empresa = models.ForeignKey(
-        'Empresa',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        db_column='EMPRESA_ID_EMPRESA'
-    )
 
     class Meta:
         db_table = 'PROMPT_GEMINI'
@@ -83,23 +101,6 @@ class PromptGemini(models.Model):
 
     def __str__(self):
         return f"Prompt {self.id_prompt} - {self.timestamp.strftime('%d/%m/%Y')}"
-
-# =========================
-# Tabla Empresa
-# =========================
-class Empresa(models.Model):
-    id_empresa = models.AutoField(primary_key=True)
-    nombre_empresa = models.CharField(max_length=100)
-    rut_empresa = models.CharField(max_length=20, unique=True)
-    empresa_activa = models.BooleanField(default=False)
-    registrada_en = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        managed = False
-        db_table = 'EMPRESA'
-
-    def __str__(self):
-        return f"{self.id_empresa} - {self.nombre_empresa} ({'Activa' if self.empresa_activa else 'Inactiva'})"
 
 # =========================
 # Tabla Departamento
