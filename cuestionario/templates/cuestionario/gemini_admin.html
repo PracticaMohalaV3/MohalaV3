@@ -18,17 +18,8 @@
             {% csrf_token %}
             <div class="row gtr-uniform">
                 <div class="col-12" style="margin-bottom: 1em;">
-                    <label for="empresa_id"><strong>Empresa:</strong></label>
-                    <select name="empresa_id" id="empresa_id" required
-                            style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; width: 100%;">
-                        <option value="">-- Selecciona empresa --</option>
-                        {% for empresa in empresas %}
-                            <option value="{{ empresa.id_empresa }}"
-                                {% if empresa_actual and empresa.id_empresa == empresa_actual.id_empresa %}selected{% endif %}>
-                                {{ empresa.nombre_empresa }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    <input type="hidden" name="empresa_id" value="{{ empresa_actual.id_empresa }}">
+                    <p><strong>Empresa: </strong><span style="color: #51ff85; font-weight: bold;">{{ empresa_actual.nombre_empresa }}</span></p>
                 </div>
                 <div class="col-12">
                     <label for="prompt_texto"><strong>Escribe el prompt para la IA:</strong></label>
