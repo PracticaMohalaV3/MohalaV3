@@ -98,10 +98,15 @@
     </li>
     
     <li>
-        <a href="{% url 'panel_gemini' %}" class="button primary">
-            🤖 Panel Informe con IA
-        </a>
+    <a href="{% url 'panel_gemini' %}" class="button primary" id="btn-gemini"
+       onclick="
+           var empresaId = document.querySelector('select[name=empresa_id]').value;
+           if(empresaId) { this.href = '{% url 'panel_gemini' %}?empresa_id=' + empresaId; }
+       ">
+        🤖 Panel Informe con IA
+    </a>
     </li>
+    
     {% endif %}
     </ul>
 </section>

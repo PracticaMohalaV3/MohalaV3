@@ -19,17 +19,30 @@ genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 @login_required
 def panel_gemini(request):
-    """Panel principal de administración de Gemini"""
     if not request.user.is_superuser:
         return redirect('index')
     
-    ultimo_prompt = PromptGemini.objects.first()
-    historial = PromptGemini.objects.all()[:20]
+    empresa_id = request.GET.get('empresa_id')
+    empresa_obj = None
+
+    if empresa_id:
+        try:
+            empresa_obj = Empresa.objects.get(id_empresa=empresa_id)
+        except Empresa.DoesNotExist:
+            pass
+
+    if empresa_obj:
+        ultimo_prompt = PromptGemini.objects.filter(empresa=empresa_obj).first()
+        historial = PromptGemini.objects.filter(empresa=empresa_obj)[:20]
+    else:
+        ultimo_prompt = PromptGemini.objects.first()
+        historial = PromptGemini.objects.all()[:20]
     
     context = {
         'ultimo_prompt': ultimo_prompt,
         'historial': historial,
-        'empresas': Empresa.objects.filter(empresa_activa=True),  # ← AGREGADO
+        'empresas': Empresa.objects.filter(empresa_activa=True),
+        'empresa_actual': empresa_obj,  
     }
     
     return render(request, 'cuestionario/gemini_admin.html', context)
