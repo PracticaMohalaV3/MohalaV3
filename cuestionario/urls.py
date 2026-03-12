@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from . import logica as views
-from .logica import validador_login, seguimiento, detalle_seguimiento, reporte_pdf, reporte_excel, gemini_admin, reporte_global, manejo_archivos
+from .logica import validador_login, seguimiento, detalle_seguimiento, reporte_pdf, reporte_excel, gemini_admin, reporte_global, manejo_archivos, edicion_cuestionario  # ← AGREGADO edicion_cuestionario
 
 urlpatterns = [
     path('login/', validador_login.login_view, name='login'),
@@ -68,4 +68,9 @@ urlpatterns = [
     path('resultados/<int:trabajador_id>/<str:tipo_evaluacion>/', 
          views.ver_resultados, 
          name='ver_resultados'),
+
+    path('edicion/', edicion_cuestionario.panel_edicion, name='panel_edicion'),
+    path('edicion/dimension/editar/<int:dimension_id>/', edicion_cuestionario.editar_dimension, name='editar_dimension'),
+    path('edicion/competencia/editar/<int:competencia_id>/', edicion_cuestionario.editar_competencia, name='editar_competencia'),
+    path('edicion/texto/editar/<int:texto_id>/', edicion_cuestionario.editar_texto, name='editar_texto'),
 ]

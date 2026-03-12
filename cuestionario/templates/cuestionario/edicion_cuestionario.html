@@ -1,0 +1,141 @@
+{% extends "cuestionario/base.html" %}
+
+{% block title %}Edición de Cuestionario{% endblock %}
+
+{% block content %}
+<section>
+    <header>
+        <a href="{% url 'index' %}" class="button small primary">← Volver al Panel</a>
+        <h2 style="margin-top: 1em;">Edición de Cuestionario</h2>
+        <p>Edita dimensiones, competencias y textos de evaluación por empresa.</p>
+    </header>
+
+    <!-- SELECTOR DE EMPRESA -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <form method="GET" action="{% url 'panel_edicion' %}">
+            <label><strong>Selecciona empresa:</strong></label>
+            <select name="empresa_id" onchange="this.form.submit()"
+                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; margin-left: 1em;">
+                <option value="">-- Selecciona empresa --</option>
+                {% for empresa in empresas %}
+                    <option value="{{ empresa.id_empresa }}"
+                        {% if empresa_actual and empresa.id_empresa == empresa_actual.id_empresa %}selected{% endif %}>
+                        {{ empresa.nombre_empresa }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if empresa_actual %}
+
+    <!-- DIMENSIONES -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <h3 style="color: #51ff85;">📐 Dimensiones</h3>
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre actual</th>
+                        <th>Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dim in dimensiones %}
+                    <tr>
+                        <td>{{ dim.id_dimension }}</td>
+                        <td>{{ dim.nombre_dimension }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'editar_dimension' dim.id_dimension %}" style="display:flex; gap: 0.5em;">
+                                {% csrf_token %}
+                                <input type="text" name="nombre_dimension" value="{{ dim.nombre_dimension }}"
+                                       style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 250px;">
+                                <button type="submit" class="button small primary">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- COMPETENCIAS -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <h3 style="color: #2196F3;">🎯 Competencias</h3>
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Dimensión</th>
+                        <th>Nombre actual</th>
+                        <th>Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comp in competencias %}
+                    <tr>
+                        <td>{{ comp.id_competencia }}</td>
+                        <td>{{ comp.dimension.nombre_dimension }}</td>
+                        <td>{{ comp.nombre_competencia }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'editar_competencia' comp.id_competencia %}" style="display:flex; gap: 0.5em;">
+                                {% csrf_token %}
+                                <input type="text" name="nombre_competencia" value="{{ comp.nombre_competencia }}"
+                                       style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 300px;">
+                                <button type="submit" class="button small primary">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TEXTOS DE EVALUACIÓN -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <h3 style="color: #ff9800;">📝 Textos de Evaluación</h3>
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr>
+                        <th style="width:8%;">Código</th>
+                        <th style="width:15%;">Dimensión</th>
+                        <th style="width:18%;">Competencia</th>
+                        <th style="width:12%;">Nivel</th>
+                        <th style="width:47%;">Texto / Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for texto in textos %}
+                    <tr>
+                        <td><strong>{{ texto.codigo_excel }}</strong></td>
+                        <td>{{ texto.dimension.nombre_dimension }}</td>
+                        <td>{{ texto.competencia.nombre_competencia }}</td>
+                        <td>{{ texto.nivel_jerarquico.nombre_nivel_jerarquico }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'editar_texto' texto.id_textos_evaluacion %}" style="display:flex; gap: 0.5em; align-items: flex-start;">
+                                {% csrf_token %}
+                                <textarea name="texto" rows="3"
+                                          style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ texto.texto }}</textarea>
+                                <button type="submit" class="button small primary" style="white-space: nowrap;">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+    <p style="opacity: 0.5; text-align: center; padding: 3em;">
+        Selecciona una empresa para ver y editar su cuestionario.
+    </p>
+    {% endif %}
+
+</section>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, TextosEvaluacion
+from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, TextosEvaluacion, Empresa
 
 @login_required
 def index(request):
@@ -13,6 +13,7 @@ def index(request):
             'es_jefe': False,
             'equipo': [],
             'ya_hizo_autoevaluacion': False,
+            'empresas_activas': Empresa.objects.filter(empresa_activa=True),
         }
         return render(request, 'cuestionario/index.html', context)
 

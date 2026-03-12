@@ -29,9 +29,21 @@
                     <li><a href="/admin/" class="button primary">Ir al Admin de Django</a></li>
                 </ul>
             </section>
+            <section>
+                <span class="icon solid major fa-edit"></span>
+                <h3>Edición de Cuestionario</h3>
+                <p>Edita dimensiones, competencias y textos de evaluación por empresa.</p>
+                <ul class="actions">
+                    {% for empresa in empresas_activas %}
+                    <li>
+                        <a href="{% url 'panel_edicion' %}?empresa_id={{ empresa.id_empresa }}" class="button primary">
+                            {{ empresa.nombre_empresa }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
         </div>
-    </section>
-
     {% else %}
     <section>
         <header>
