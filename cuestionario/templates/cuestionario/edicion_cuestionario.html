@@ -7,24 +7,25 @@
     <header>
         <a href="{% url 'index' %}" class="button small primary">← Volver al Panel</a>
         <h2 style="margin-top: 1em;">Edición de Cuestionario</h2>
-        <p>Edita dimensiones, competencias y textos de evaluación por empresa.</p>
+        <p>Edita dimensiones, competencias, niveles y textos de evaluación por empresa.</p>
     </header>
 
-    <!-- SELECTOR DE EMPRESA -->
+     <!-- EMPRESA ACTIVA -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
-        <form method="GET" action="{% url 'panel_edicion' %}">
-            <label><strong>Selecciona empresa:</strong></label>
-            <select name="empresa_id" onchange="this.form.submit()"
-                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; margin-left: 1em;">
-                <option value="">-- Selecciona empresa --</option>
-                {% for empresa in empresas %}
-                    <option value="{{ empresa.id_empresa }}"
-                        {% if empresa_actual and empresa.id_empresa == empresa_actual.id_empresa %}selected{% endif %}>
-                        {{ empresa.nombre_empresa }}
-                    </option>
-                {% endfor %}
-            </select>
-        </form>
+        {% if empresa_actual %}
+            <p><strong>Empresa: </strong><span style="color: #51ff85; font-weight: bold;">{{ empresa_actual.nombre_empresa }}</span></p>
+        {% else %}
+            <form method="GET" action="{% url 'panel_edicion' %}">
+                <label><strong>Selecciona empresa:</strong></label>
+                <select name="empresa_id" onchange="this.form.submit()"
+                        style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; margin-left: 1em;">
+                    <option value="">-- Selecciona empresa --</option>
+                    {% for empresa in empresas %}
+                        <option value="{{ empresa.id_empresa }}">{{ empresa.nombre_empresa }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        {% endif %}
     </div>
 
     {% if empresa_actual %}
