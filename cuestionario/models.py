@@ -343,6 +343,7 @@ class Trabajador(models.Model):
     apellido_materno = models.CharField(max_length=40)
     email = models.CharField(max_length=80)
     genero = models.CharField(max_length=10)
+    es_coordinador = models.BooleanField(default=False, db_column='ES_COORDINADOR')
     
     empresa = models.ForeignKey(
         'Empresa', 
