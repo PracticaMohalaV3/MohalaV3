@@ -10,6 +10,14 @@
         <p>Edita dimensiones, competencias, niveles y textos de evaluación por empresa.</p>
     </header>
 
+    {% if messages %}
+        {% for message in messages %}
+        <div class="box" style="border-left: 4px solid #51ff85; margin-bottom: 1.5em;">
+            <p style="color: #51ff85; font-weight: bold; margin: 0;">{{ message }}</p>
+        </div>
+        {% endfor %}
+    {% endif %}
+
      <!-- EMPRESA ACTIVA -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
         {% if empresa_actual %}

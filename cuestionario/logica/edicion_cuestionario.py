@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from cuestionario.models import Empresa, Dimension, Competencia, TextosEvaluacion, NivelJerarquico 
+from django.contrib import messages  
+from cuestionario.models import Empresa, Dimension, Competencia, TextosEvaluacion, NivelJerarquico
+
 
 @login_required
 def panel_edicion(request):
@@ -11,7 +13,7 @@ def panel_edicion(request):
     empresa_actual = None
     dimensiones = []
     competencias = []
-    niveles = []  
+    niveles = []
     textos = []
 
     if empresa_id:
@@ -23,7 +25,7 @@ def panel_edicion(request):
     if empresa_actual:
         dimensiones = Dimension.objects.filter(empresa=empresa_actual)
         competencias = Competencia.objects.filter(empresa=empresa_actual).select_related('dimension')
-        niveles = NivelJerarquico.objects.filter(empresa=empresa_actual)  
+        niveles = NivelJerarquico.objects.filter(empresa=empresa_actual)
         textos = TextosEvaluacion.objects.filter(empresa=empresa_actual).select_related(
             'dimension', 'competencia', 'nivel_jerarquico'
         ).order_by('dimension__nombre_dimension', 'competencia__nombre_competencia', 'codigo_excel')
@@ -33,7 +35,7 @@ def panel_edicion(request):
         'empresa_actual': empresa_actual,
         'dimensiones': dimensiones,
         'competencias': competencias,
-        'niveles': niveles,  
+        'niveles': niveles,
         'textos': textos,
     }
     return render(request, 'cuestionario/edicion_cuestionario.html', context)
@@ -51,6 +53,7 @@ def editar_dimension(request, dimension_id):
         if nombre:
             dimension.nombre_dimension = nombre
             dimension.save()
+            messages.success(request, f'✅ Dimensión "{nombre}" actualizada correctamente.')  
         return redirect(f'/edicion/?empresa_id={dimension.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -68,6 +71,7 @@ def editar_competencia(request, competencia_id):
         if nombre:
             competencia.nombre_competencia = nombre
             competencia.save()
+            messages.success(request, f'✅ Competencia "{nombre}" actualizada correctamente.')  
         return redirect(f'/edicion/?empresa_id={competencia.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -85,6 +89,7 @@ def editar_nivel(request, nivel_id):
         if nombre:
             nivel.nombre_nivel_jerarquico = nombre
             nivel.save()
+            messages.success(request, f'✅ Nivel jerárquico "{nombre}" actualizado correctamente.')  
         return redirect(f'/edicion/?empresa_id={nivel.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -99,12 +104,13 @@ def editar_texto(request, texto_id):
 
     if request.method == 'POST':
         nuevo_texto = request.POST.get('texto', '').strip()
-        nuevo_codigo = request.POST.get('codigo_excel', '').strip()  
+        nuevo_codigo = request.POST.get('codigo_excel', '').strip()
         if nuevo_texto:
             texto.texto = nuevo_texto
-        if nuevo_codigo:  
+        if nuevo_codigo:
             texto.codigo_excel = nuevo_codigo
         texto.save()
+        messages.success(request, f'✅ Texto "{nuevo_codigo or texto.codigo_excel}" actualizado correctamente.') 
         return redirect(f'/edicion/?empresa_id={texto.empresa.id_empresa}')
 
     return redirect('panel_edicion')
