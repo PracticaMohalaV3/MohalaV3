@@ -31,7 +31,7 @@
 
     <!-- DIMENSIONES -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
-        <h3 style="color: #51ff85;">📐 Dimensiones</h3>
+        <h3 style="color: #51ff85;">Dimensiones</h3>
         <div class="table-wrapper">
             <table class="alt">
                 <thead>
@@ -63,7 +63,7 @@
 
     <!-- COMPETENCIAS -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
-        <h3 style="color: #2196F3;">🎯 Competencias</h3>
+        <h3 style="color: #2196F3;">Competencias</h3>
         <div class="table-wrapper">
             <table class="alt">
                 <thead>
@@ -95,18 +95,50 @@
         </div>
     </div>
 
-    <!-- TEXTOS DE EVALUACIÓN -->
+    <!-- NIVELES JERÁRQUICOS --> 
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
-        <h3 style="color: #ff9800;">📝 Textos de Evaluación</h3>
+        <h3 style="color: #ce93d8;">Niveles Jerárquicos</h3>
         <div class="table-wrapper">
             <table class="alt">
                 <thead>
                     <tr>
-                        <th style="width:8%;">Código</th>
-                        <th style="width:15%;">Dimensión</th>
-                        <th style="width:18%;">Competencia</th>
-                        <th style="width:12%;">Nivel</th>
-                        <th style="width:47%;">Texto / Editar</th>
+                        <th>ID</th>
+                        <th>Nombre actual</th>
+                        <th>Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for nivel in niveles %}
+                    <tr>
+                        <td>{{ nivel.id_nivel_jerarquico }}</td>
+                        <td>{{ nivel.nombre_nivel_jerarquico }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'editar_nivel' nivel.id_nivel_jerarquico %}" style="display:flex; gap: 0.5em;">
+                                {% csrf_token %}
+                                <input type="text" name="nombre_nivel_jerarquico" value="{{ nivel.nombre_nivel_jerarquico }}"
+                                       style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 250px;">
+                                <button type="submit" class="button small primary">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TEXTOS DE EVALUACIÓN -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <h3 style="color: #ff9800;">Textos de Evaluación</h3>
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">Código</th>
+                        <th style="width:13%;">Dimensión</th>
+                        <th style="width:15%;">Competencia</th>
+                        <th style="width:10%;">Nivel</th>
+                        <th style="width:52%;">Editar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -117,11 +149,18 @@
                         <td>{{ texto.competencia.nombre_competencia }}</td>
                         <td>{{ texto.nivel_jerarquico.nombre_nivel_jerarquico }}</td>
                         <td>
-                            <form method="POST" action="{% url 'editar_texto' texto.id_textos_evaluacion %}" style="display:flex; gap: 0.5em; align-items: flex-start;">
+                            <form method="POST" action="{% url 'editar_texto' texto.id_textos_evaluacion %}" style="display:flex; flex-direction: column; gap: 0.5em;">
                                 {% csrf_token %}
-                                <textarea name="texto" rows="3"
-                                          style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ texto.texto }}</textarea>
-                                <button type="submit" class="button small primary" style="white-space: nowrap;">Guardar</button>
+                                <div style="display:flex; gap: 0.5em; align-items: center;">
+                                    <label style="font-size:0.8em; opacity:0.7; white-space:nowrap;">Código Excel:</label>
+                                    <input type="text" name="codigo_excel" value="{{ texto.codigo_excel }}"
+                                           style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 120px; font-size:0.85em;">
+                                </div>
+                                <div style="display:flex; gap: 0.5em; align-items: flex-start;">
+                                    <textarea name="texto" rows="3"
+                                              style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ texto.texto }}</textarea>
+                                    <button type="submit" class="button small primary" style="white-space: nowrap;">Guardar</button>
+                                </div>
                             </form>
                         </td>
                     </tr>
