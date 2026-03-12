@@ -6,6 +6,7 @@
 
 {% block content %}
     
+<!-- PANEL ADMIN -->
     {% if es_admin_sistema %}
     <section>
         <header>
@@ -92,7 +93,8 @@
                             <thead>
                                 <tr>
                                     <th>Colaborador</th>
-                                    <th>Estado Colaborador</th> <th style="text-align: center;">Acción</th>
+                                    <th>Estado Colaborador</th>
+                                    <th style="text-align: center;">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -144,6 +146,39 @@
         </section>
     </section>
     {% endif %}
+
+    <!-- PANEL COORDINADOR -->
+    {% if es_coordinador %}
+    <section style="margin-top: 2em;">
+        <header>
+            <h2>Panel de Coordinador</h2>
+            <p>Gestiona el proceso de evaluación de <strong>{{ trabajador.empresa.nombre_empresa }}</strong>.</p>
+        </header>
+        <div class="features">
+            <section>
+                <span class="icon solid major fa-chart-line"></span>
+                <h3>Seguimiento de Empresa</h3>
+                <p>Visualiza el estado de las evaluaciones de {{ trabajador.empresa.nombre_empresa }}.</p>
+                <ul class="actions">
+                    <li><a href="{% url 'seguimiento_admin' %}" class="button primary">Ver Seguimiento</a></li>
+                </ul>
+            </section>
+            <section>
+                <span class="icon solid major fa-edit"></span>
+                <h3>Edición de Cuestionario</h3>
+                <p>Edita dimensiones, competencias y textos de {{ trabajador.empresa.nombre_empresa }}.</p>
+                <ul class="actions">
+                    <li>
+                        <a href="{% url 'panel_edicion' %}?empresa_id={{ trabajador.empresa.id_empresa }}" class="button primary">
+                            Editar Cuestionario
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </section>
+    {% endif %}
+
     {% endif %}
 
 {% endblock %}

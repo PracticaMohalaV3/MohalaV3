@@ -5,10 +5,25 @@ from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, 
 
 @login_required
 def panel_seguimiento(request):
+    # Permite acceso a superadmin Y coordinador
+    es_coordinador = False
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+        except Trabajador.DoesNotExist:
+            return redirect('index')
 
-    trabajadores = Trabajador.objects.all().select_related('cargo', 'empresa').order_by('empresa__nombre_empresa', '-nivel_jerarquico__id_nivel_jerarquico')
+    # Coordinador solo ve su empresa, superadmin ve todas
+    if es_coordinador:
+        trabajador_actual = Trabajador.objects.get(user=request.user)
+        trabajadores = Trabajador.objects.filter(
+            empresa=trabajador_actual.empresa
+        ).select_related('cargo', 'empresa').order_by('-nivel_jerarquico__id_nivel_jerarquico')
+    else:
+        trabajadores = Trabajador.objects.all().select_related('cargo', 'empresa').order_by('empresa__nombre_empresa', '-nivel_jerarquico__id_nivel_jerarquico')
     
     total_por_realizar = 0
     autos_listas = 0
@@ -48,6 +63,7 @@ def panel_seguimiento(request):
         'autos_pendientes': autos_pendientes,
         'jefaturas_listas': jefaturas_listas,
         'jefaturas_pendientes': jefaturas_pendientes,
-        'empresas': Empresa.objects.filter(empresa_activa=True), 
+        'empresas': Empresa.objects.filter(empresa_activa=True),
+        'es_coordinador': es_coordinador,  
     }
     return render(request, 'cuestionario/seguimiento.html', context)

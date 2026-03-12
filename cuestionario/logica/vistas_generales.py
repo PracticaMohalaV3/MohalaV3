@@ -45,6 +45,7 @@ def index(request):
         'equipo': equipo,
         'ya_hizo_autoevaluacion': autoeval_completada,
         'es_admin_sistema': False,
+        'es_coordinador': trabajador.es_coordinador, 
     }
     return render(request, 'cuestionario/index.html', context)
 
@@ -79,26 +80,22 @@ def ver_resultados(request, trabajador_id, tipo_evaluacion):
         codigo_excel__in=codigos
     ).select_related('dimension', 'competencia')
 
-    # Filtramos por dimensión si viene el parámetro
     if dimension_filtro:
         textos_qs = textos_qs.filter(dimension__id_dimension=dimension_filtro)
 
-    # Mapa codigo_excel -> objeto TextosEvaluacion
     textos_map = {t.codigo_excel: t for t in textos_qs}
 
-    # Agrupar respuestas por nombre de dimensión
     dimensiones_data = {}
     for respuesta in respuestas:
         codigo = respuesta.textos_evaluacion_codigo_excel
         texto_eval = textos_map.get(codigo)
         if not texto_eval:
-            continue  # código no encontrado para esta empresa, se omite
+            continue
 
         dim_nombre = texto_eval.dimension.nombre_dimension
         if dim_nombre not in dimensiones_data:
             dimensiones_data[dim_nombre] = []
 
-        # Adjuntamos el objeto TextosEvaluacion a la respuesta para el template
         respuesta.texto_eval = texto_eval
         dimensiones_data[dim_nombre].append(respuesta)
 

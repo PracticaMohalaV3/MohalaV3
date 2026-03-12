@@ -83,7 +83,7 @@
         <a href="{% url 'index' %}" class="button primary">Volver al Panel</a>
     </li>
     
-    {% if user.is_superuser %}
+    {% if user.is_superuser or es_coordinador %}
     <li>
         <form method="GET" action="{% url 'generar_reporte_global_pdf' %}" style="display: inline-flex; align-items: center; gap: 0.5em;">
             <select name="empresa_id" required
