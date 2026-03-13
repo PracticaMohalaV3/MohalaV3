@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from cuestionario.models import (
     Trabajador, TextosEvaluacion, Autoevaluacion, 
-    EvaluacionJefatura, Escala, DescripcionRespuesta, Dimension
+    EvaluacionJefatura, Escala, Dimension
 )
 from django.db import transaction
 from .calculos import generar_consolidado 
@@ -42,7 +42,7 @@ def cuestionario_autoevaluacion(request, trabajador_id, dimension_id=None):
             ).exists()
             
             dimensiones_estado.append({
-                'dimension': dim,  # objeto completo con id y nombre
+                'dimension': dim,
                 'hecho': hecho
             })
         
@@ -75,9 +75,7 @@ def cuestionario_autoevaluacion(request, trabajador_id, dimension_id=None):
         dimension=dimension_obj
     ).select_related('competencia__dimension').order_by('id_textos_evaluacion')
 
-    descripciones_qs = DescripcionRespuesta.objects.filter(
-        empresa=empresa
-    ).select_related('escala')
+    descripciones_qs = Escala.objects.filter(empresa=empresa).order_by('valor')
 
     if request.method == 'POST':
         with transaction.atomic():
@@ -201,9 +199,7 @@ def cuestionario_jefatura(request, evaluador_id, evaluado_id, dimension_id=None)
         dimension=dimension_obj
     ).select_related('competencia__dimension').order_by('id_textos_evaluacion')
 
-    descripciones_qs = DescripcionRespuesta.objects.filter(
-        empresa=empresa
-    ).select_related('escala')
+    descripciones_qs = Escala.objects.filter(empresa=empresa).order_by('valor')
 
     if request.method == 'POST':
         with transaction.atomic():

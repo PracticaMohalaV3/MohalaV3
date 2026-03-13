@@ -53,12 +53,12 @@
                                            style="margin-top: 4px; transform: scale(0.6);">
                                     
                                     <label for="radio_{{ p.id_textos_evaluacion }}_{{ i }}" style="margin-bottom: 0; cursor: pointer; flex: 1;">
-                                        {% for d in descripciones %}
-                                            {% if d.textos_evaluacion_codigo_excel == p.codigo_excel and d.escala.valor|stringformat:"i" == i %}
-                                                <span style="font-weight: bold; color: #fff; font-size: 0.88em;">{{ i }}. {{ d.escala.descripcion }}:</span>
-                                                <span style="font-size: 0.85em; display: block; line-height: 1.3; opacity: 0.9;">{{ d.descripcion }}</span>
-                                            {% endif %}
-                                        {% endfor %}
+                                    {% for d in descripciones %}
+                                        {% if d.valor|stringformat:"i" == i %}
+                                            <span style="font-weight: bold; color: #fff; font-size: 0.88em;">{{ i }}. {{ d.titulo }}:</span>
+                                            <span style="font-size: 0.85em; display: block; line-height: 1.3; opacity: 0.9;">{{ d.descripcion }}</span>
+                                        {% endif %}
+                                    {% endfor %}
                                     </label>
                                 </div>
                                 {% endfor %}
