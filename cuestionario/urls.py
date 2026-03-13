@@ -73,5 +73,5 @@ urlpatterns = [
     path('edicion/dimension/editar/<int:dimension_id>/', edicion_cuestionario.editar_dimension, name='editar_dimension'),
     path('edicion/competencia/editar/<int:competencia_id>/', edicion_cuestionario.editar_competencia, name='editar_competencia'),
     path('edicion/texto/editar/<int:texto_id>/', edicion_cuestionario.editar_texto, name='editar_texto'),
-    path('edicion/nivel/editar/<int:nivel_id>/', edicion_cuestionario.editar_nivel, name='editar_nivel'),
+    path('edicion/escala/editar/<int:escala_id>/', edicion_cuestionario.editar_escala, name='editar_escala'),
 ]

@@ -1,26 +1,36 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages  
-from cuestionario.models import Empresa, Dimension, Competencia, TextosEvaluacion, NivelJerarquico
+from cuestionario.models import Empresa, Dimension, Competencia, TextosEvaluacion, NivelJerarquico, Escala, Trabajador
 
 
 @login_required
 def panel_edicion(request):
-    if not request.user.is_superuser:
-        return redirect('index')
-
-    empresa_id = request.GET.get('empresa_id')
+    es_coordinador = False
     empresa_actual = None
+
+    if request.user.is_superuser:
+        empresa_id = request.GET.get('empresa_id')
+        if empresa_id:
+            try:
+                empresa_actual = Empresa.objects.get(id_empresa=empresa_id)
+            except Empresa.DoesNotExist:
+                pass
+    else:
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+            empresa_actual = trabajador.empresa
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+
     dimensiones = []
     competencias = []
     niveles = []
     textos = []
-
-    if empresa_id:
-        try:
-            empresa_actual = Empresa.objects.get(id_empresa=empresa_id)
-        except Empresa.DoesNotExist:
-            pass
+    escalas = []
 
     if empresa_actual:
         dimensiones = Dimension.objects.filter(empresa=empresa_actual)
@@ -28,7 +38,8 @@ def panel_edicion(request):
         niveles = NivelJerarquico.objects.filter(empresa=empresa_actual)
         textos = TextosEvaluacion.objects.filter(empresa=empresa_actual).select_related(
             'dimension', 'competencia', 'nivel_jerarquico'
-        ).order_by('dimension__nombre_dimension', 'competencia__nombre_competencia', 'codigo_excel')
+        ).order_by('id_textos_evaluacion')
+        escalas = Escala.objects.filter(empresa=empresa_actual).order_by('valor')
 
     context = {
         'empresas': Empresa.objects.filter(empresa_activa=True),
@@ -37,6 +48,8 @@ def panel_edicion(request):
         'competencias': competencias,
         'niveles': niveles,
         'textos': textos,
+        'escalas': escalas,
+        'es_coordinador': es_coordinador,
     }
     return render(request, 'cuestionario/edicion_cuestionario.html', context)
 
@@ -44,7 +57,12 @@ def panel_edicion(request):
 @login_required
 def editar_dimension(request, dimension_id):
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
 
     dimension = get_object_or_404(Dimension, id_dimension=dimension_id)
 
@@ -53,7 +71,7 @@ def editar_dimension(request, dimension_id):
         if nombre:
             dimension.nombre_dimension = nombre
             dimension.save()
-            messages.success(request, f'✅ Dimensión "{nombre}" actualizada correctamente.')  
+            messages.success(request, f'✅ Dimensión "{nombre}" actualizada correctamente.')
         return redirect(f'/edicion/?empresa_id={dimension.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -62,7 +80,12 @@ def editar_dimension(request, dimension_id):
 @login_required
 def editar_competencia(request, competencia_id):
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
 
     competencia = get_object_or_404(Competencia, id_competencia=competencia_id)
 
@@ -71,7 +94,7 @@ def editar_competencia(request, competencia_id):
         if nombre:
             competencia.nombre_competencia = nombre
             competencia.save()
-            messages.success(request, f'✅ Competencia "{nombre}" actualizada correctamente.')  
+            messages.success(request, f'✅ Competencia "{nombre}" actualizada correctamente.')
         return redirect(f'/edicion/?empresa_id={competencia.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -80,7 +103,12 @@ def editar_competencia(request, competencia_id):
 @login_required
 def editar_nivel(request, nivel_id):
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
 
     nivel = get_object_or_404(NivelJerarquico, id_nivel_jerarquico=nivel_id)
 
@@ -89,7 +117,7 @@ def editar_nivel(request, nivel_id):
         if nombre:
             nivel.nombre_nivel_jerarquico = nombre
             nivel.save()
-            messages.success(request, f'✅ Nivel jerárquico "{nombre}" actualizado correctamente.')  
+            messages.success(request, f'✅ Nivel jerárquico "{nombre}" actualizado correctamente.')
         return redirect(f'/edicion/?empresa_id={nivel.empresa.id_empresa}')
 
     return redirect('panel_edicion')
@@ -98,19 +126,47 @@ def editar_nivel(request, nivel_id):
 @login_required
 def editar_texto(request, texto_id):
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
 
     texto = get_object_or_404(TextosEvaluacion, id_textos_evaluacion=texto_id)
 
     if request.method == 'POST':
         nuevo_texto = request.POST.get('texto', '').strip()
-        nuevo_codigo = request.POST.get('codigo_excel', '').strip()
         if nuevo_texto:
             texto.texto = nuevo_texto
-        if nuevo_codigo:
-            texto.codigo_excel = nuevo_codigo
-        texto.save()
-        messages.success(request, f'✅ Texto "{nuevo_codigo or texto.codigo_excel}" actualizado correctamente.') 
+            texto.save()
+            messages.success(request, f'✅ Texto "{texto.codigo_excel}" actualizado correctamente.')
         return redirect(f'/edicion/?empresa_id={texto.empresa.id_empresa}')
+
+    return redirect('panel_edicion')
+
+
+@login_required
+def editar_escala(request, escala_id):
+    if not request.user.is_superuser:
+        try:
+            trabajador = Trabajador.objects.get(user=request.user)
+            if not trabajador.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+
+    escala = get_object_or_404(Escala, id_escala=escala_id)
+
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
+        if titulo:
+            escala.titulo = titulo
+        if descripcion:
+            escala.descripcion = descripcion
+        escala.save()
+        messages.success(request, f'✅ Escala "{escala.titulo}" actualizada correctamente.')
+        return redirect(f'/edicion/?empresa_id={escala.empresa.id_empresa}')
 
     return redirect('panel_edicion')

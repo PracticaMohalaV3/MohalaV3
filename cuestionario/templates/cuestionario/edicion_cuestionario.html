@@ -18,7 +18,7 @@
         {% endfor %}
     {% endif %}
 
-     <!-- EMPRESA ACTIVA -->
+    <!-- EMPRESA ACTIVA -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
         {% if empresa_actual %}
             <p><strong>Empresa: </strong><span style="color: #51ff85; font-weight: bold;">{{ empresa_actual.nombre_empresa }}</span></p>
@@ -104,7 +104,7 @@
         </div>
     </div>
 
-    <!-- NIVELES JERÁRQUICOS --> 
+    <!-- NIVELES JERÁRQUICOS -->
     <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
         <h3 style="color: #ce93d8;">Niveles Jerárquicos</h3>
         <div class="table-wrapper">
@@ -158,16 +158,47 @@
                         <td>{{ texto.competencia.nombre_competencia }}</td>
                         <td>{{ texto.nivel_jerarquico.nombre_nivel_jerarquico }}</td>
                         <td>
-                            <form method="POST" action="{% url 'editar_texto' texto.id_textos_evaluacion %}" style="display:flex; flex-direction: column; gap: 0.5em;">
+                            <form method="POST" action="{% url 'editar_texto' texto.id_textos_evaluacion %}" style="display:flex; gap: 0.5em; align-items: flex-start;">
                                 {% csrf_token %}
-                                <div style="display:flex; gap: 0.5em; align-items: center;">
-                                    <label style="font-size:0.8em; opacity:0.7; white-space:nowrap;">Código Excel:</label>
-                                    <input type="text" name="codigo_excel" value="{{ texto.codigo_excel }}"
-                                           style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 120px; font-size:0.85em;">
-                                </div>
+                                <textarea name="texto" rows="3"
+                                          style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ texto.texto }}</textarea>
+                                <button type="submit" class="button small primary" style="white-space: nowrap;">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ESCALA -->
+    <div style="background: rgba(255,255,255,0.05); padding: 2em; border-radius: 8px; margin-bottom: 2em;">
+        <h3 style="color: #f48fb1;">Escala de Evaluación</h3>
+        <div class="table-wrapper">
+            <table class="alt">
+                <thead>
+                    <tr>
+                        <th style="width:8%;">Valor</th>
+                        <th style="width:20%;">Título actual</th>
+                        <th style="width:30%;">Descripción actual</th>
+                        <th style="width:42%;">Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for escala in escalas %}
+                    <tr>
+                        <td><strong>{{ escala.valor }}</strong></td>
+                        <td>{{ escala.titulo }}</td>
+                        <td style="font-size:0.85em; opacity:0.8;">{{ escala.descripcion }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'editar_escala' escala.id_escala %}" style="display:flex; flex-direction: column; gap: 0.5em;">
+                                {% csrf_token %}
+                                <input type="text" name="titulo" value="{{ escala.titulo }}"
+                                       style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size:0.85em;">
                                 <div style="display:flex; gap: 0.5em; align-items: flex-start;">
-                                    <textarea name="texto" rows="3"
-                                              style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ texto.texto }}</textarea>
+                                    <textarea name="descripcion" rows="3"
+                                              style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.3em 0.7em; border-radius: 4px; width: 100%; font-size: 0.85em;">{{ escala.descripcion }}</textarea>
                                     <button type="submit" class="button small primary" style="white-space: nowrap;">Guardar</button>
                                 </div>
                             </form>
