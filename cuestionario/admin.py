@@ -5,7 +5,7 @@ from .models import (
     Dimension, Departamento, NivelJerarquico, Cargo, Trabajador, 
     Competencia, TextosEvaluacion, Autoevaluacion, 
     EvaluacionJefatura, ResultadoConsolidado, Escala,
-    DescripcionRespuesta, PromptGemini, ReporteGlobal,
+    PromptGemini, ReporteGlobal,
     Biblioteca, Empresa, CodigoEvaluacion
 )
 from django.utils.html import format_html
