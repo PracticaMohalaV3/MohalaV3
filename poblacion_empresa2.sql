@@ -201,21 +201,21 @@ VALUES
 
 -- NIVEL 3: Directivo (No tienen Jefe)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (7, '14.123.456-1', NULL, 'Carlos', 'Fuentes', 'Mora', 'c.fuentes@permify.cl', 'Masculino', 2, 6, 11, 4),
-    (8, '15.234.567-2', NULL, 'Daniela', 'Vega', 'Soto', 'd.vega@permify.cl', 'Femenino', 2, 6, 12, 4);
+    (7, '14.123.456-1', NULL, 'Carlos', 'Fuentes', 'Mora', 'c.fuentes@permify.cl', 'Masculino', 0, 2, 6, 11, 4),
+    (8, '15.234.567-2', NULL, 'Daniela', 'Vega', 'Soto', 'd.vega@permify.cl', 'Femenino', 1, 2, 6, 12, 4);
 
 -- NIVEL 2: Supervisor (Reportan al ID 7 y 8)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (9, '16.345.678-3', 7, 'Felipe', 'Rojas', 'Lima', 'f.rojas@permify.cl', 'Masculino', 2, 5, 9, 5),
-    (10, '17.456.789-4', 8, 'Camila', 'Núñez', 'Ríos', 'c.nunez@permify.cl', 'Femenino', 2, 5, 10, 6);
+    (9, '16.345.678-3', 7, 'Felipe', 'Rojas', 'Lima', 'f.rojas@permify.cl', 'Masculino', 0, 2, 5, 9, 5),
+    (10, '17.456.789-4', 8, 'Camila', 'Núñez', 'Ríos', 'c.nunez@permify.cl', 'Femenino', 0, 2, 5, 10, 6);
 
 -- NIVEL 1: Colaborador (Reportan al ID 9 y 10)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (11, '18.567.890-5', 9, 'Ignacio', 'Pérez', 'Blanc', 'i.perez@permify.cl', 'Masculino', 2, 4, 7, 6),
-    (12, '19.678.901-6', 10, 'Javiera', 'Muñoz', 'Cerda', 'j.munoz@permify.cl', 'Femenino', 2, 4, 8, 5);
+    (11, '18.567.890-5', 9, 'Ignacio', 'Pérez', 'Blanc', 'i.perez@permify.cl', 'Masculino', 0, 2, 4, 7, 6),
+    (12, '19.678.901-6', 10, 'Javiera', 'Muñoz', 'Cerda', 'j.munoz@permify.cl', 'Femenino', 0, 2, 4, 8, 5);

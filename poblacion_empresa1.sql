@@ -202,21 +202,21 @@ VALUES
 
 -- NIVEL 3: Estratégico (No tienen Jefe)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (1, '10.234.567-1', NULL, 'Roberto', 'Méndez', 'Castro', 'r.mendez@mohala.cl', 'Masculino', 1, 3, 5, 1),
-    (2, '12.456.789-2', NULL, 'Patricia', 'Lorca', 'Vial', 'p.lorca@mohala.cl', 'Femenino', 1, 3, 6, 1);
+    (1, '10.234.567-1', NULL, 'Roberto', 'Méndez', 'Castro', 'r.mendez@mohala.cl', 'Masculino', 0, 1, 3, 5, 1),
+    (2, '12.456.789-2', NULL, 'Patricia', 'Lorca', 'Vial', 'p.lorca@mohala.cl', 'Femenino', 1, 1, 3, 6, 1);
 
 -- NIVEL 2: Táctico (Reportan al ID 1 y 2)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (3, '13.567.890-4', 1, 'Mónica', 'Sánchez', 'Paz', 'm.sanchez@mohala.cl', 'Femenino', 1, 2, 4, 3),
-    (4, '11.345.678-3', 2, 'Andrés', 'Tapia', 'Ruiz', 'a.tapia@mohala.cl', 'Masculino', 1, 2, 3, 2);
+    (3, '13.567.890-4', 1, 'Mónica', 'Sánchez', 'Paz', 'm.sanchez@mohala.cl', 'Femenino', 0, 1, 2, 4, 3),
+    (4, '11.345.678-3', 2, 'Andrés', 'Tapia', 'Ruiz', 'a.tapia@mohala.cl', 'Masculino', 0, 1, 2, 3, 2);
 
 -- NIVEL 1: Operativo (Reporta al ID 3 y 4)
 INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
 VALUES 
-    (5, '18.456.789-9', 3, 'Valeria', 'Cáceres', 'Pinto', 'v.caceres@mohala.cl', 'Femenino', 1, 1, 1, 3),
-    (6, '19.567.890-0', 4, 'Sebastián', 'Marín', 'Rojas', 's.marin@mohala.cl', 'Masculino', 1, 1, 2, 2);
+    (5, '18.456.789-9', 3, 'Valeria', 'Cáceres', 'Pinto', 'v.caceres@mohala.cl', 'Femenino', 0, 1, 1, 1, 3),
+    (6, '19.567.890-0', 4, 'Sebastián', 'Marín', 'Rojas', 's.marin@mohala.cl', 'Masculino', 0, 1, 1, 2, 2);
