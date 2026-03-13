@@ -11,14 +11,20 @@ from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
 from datetime import datetime
 from xml.sax.saxutils import escape
+from collections import OrderedDict
 
 
 @login_required
 def generar_reporte_global_pdf(request):
-    """Genera un PDF global con todos los reportes individuales concatenados usando ReportLab"""
-
     if not request.user.is_superuser:
-        return redirect('index')
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
 
     empresa_id = request.GET.get('empresa_id')
     empresa_obj = None
@@ -28,6 +34,10 @@ def generar_reporte_global_pdf(request):
             empresa_obj = Empresa.objects.get(id_empresa=empresa_id)
         except Empresa.DoesNotExist:
             return HttpResponse("Empresa no encontrada.", status=404)
+
+    # Coordinador solo puede generar reporte de su empresa
+    if trabajador_actual:
+        empresa_obj = trabajador_actual.empresa
 
     trabajadores_qs = Trabajador.objects.filter(
         resultadoconsolidado__isnull=False
@@ -147,16 +157,22 @@ def generar_reporte_global_pdf(request):
         ).select_related('dimension', 'competencia')
         textos_map = {t.codigo_excel: t for t in textos_qs}
 
-        resultados_por_dim = {}
+        dims_ordenadas = {}
         for r in resultados:
             texto_eval = textos_map.get(r.textos_evaluacion_codigo_excel)
             if not texto_eval:
                 continue
             r.texto_eval = texto_eval
+            dim_id = texto_eval.dimension.id_dimension
             dim_nombre = texto_eval.dimension.nombre_dimension
-            if dim_nombre not in resultados_por_dim:
-                resultados_por_dim[dim_nombre] = []
-            resultados_por_dim[dim_nombre].append(r)
+            if dim_id not in dims_ordenadas:
+                dims_ordenadas[dim_id] = {'nombre': dim_nombre, 'items': []}
+            dims_ordenadas[dim_id]['items'].append(r)
+
+        resultados_por_dim = OrderedDict(
+            (v['nombre'], sorted(v['items'], key=lambda x: x.texto_eval.id_textos_evaluacion))
+            for k, v in sorted(dims_ordenadas.items())
+        )
 
         auto = Autoevaluacion.objects.filter(
             trabajador=trabajador, estado_finalizacion=True
@@ -261,18 +277,28 @@ def generar_reporte_global_pdf(request):
 
 @login_required
 def ver_reporte_global_pdf(request, reporte_id):
-    """Ver el PDF del reporte global guardado en la BD"""
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     try:
         reporte = ReporteGlobal.objects.get(id_reporte_global=reporte_id)
     except ReporteGlobal.DoesNotExist:
         return HttpResponse("Reporte no encontrado", status=404)
-    
+
+    # Coordinador solo puede ver reportes de su empresa
+    if trabajador_actual and reporte.empresa != trabajador_actual.empresa:
+        return redirect('index')
+
     if not reporte.contenido_pdf:
         return HttpResponse("Este reporte no tiene PDF generado", status=404)
-    
+
     response = HttpResponse(reporte.contenido_pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="reporte_respuestas_global_{reporte_id}.pdf"'
     return response

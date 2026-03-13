@@ -5,6 +5,7 @@ from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, 
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from io import BytesIO
+from collections import OrderedDict
 
 
 @login_required
@@ -40,16 +41,22 @@ def generar_excel_detalle(request, trabajador_id):
     ).select_related('dimension', 'competencia')
     textos_map = {t.codigo_excel: t for t in textos_qs}
 
-    resultados_por_dim = {}
+    dims_ordenadas = {}
     for r in resultados:
         texto_eval = textos_map.get(r.textos_evaluacion_codigo_excel)
         if not texto_eval:
             continue
         r.texto_eval = texto_eval
+        dim_id = texto_eval.dimension.id_dimension
         dim_nombre = texto_eval.dimension.nombre_dimension
-        if dim_nombre not in resultados_por_dim:
-            resultados_por_dim[dim_nombre] = []
-        resultados_por_dim[dim_nombre].append(r)
+        if dim_id not in dims_ordenadas:
+            dims_ordenadas[dim_id] = {'nombre': dim_nombre, 'items': []}
+        dims_ordenadas[dim_id]['items'].append(r)
+
+    resultados_por_dim = OrderedDict(
+        (v['nombre'], sorted(v['items'], key=lambda x: x.texto_eval.id_textos_evaluacion))
+        for k, v in sorted(dims_ordenadas.items())
+    )
 
     auto = Autoevaluacion.objects.filter(trabajador=trabajador, estado_finalizacion=True).first()
     jefe = EvaluacionJefatura.objects.filter(trabajador_evaluado=trabajador, estado_finalizacion=True).first()
