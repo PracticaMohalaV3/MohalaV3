@@ -5,31 +5,38 @@ from cuestionario.models import Trabajador, Autoevaluacion, EvaluacionJefatura, 
 
 @login_required
 def panel_seguimiento(request):
-    # Permite acceso a superadmin Y coordinador
     es_coordinador = False
+    empresa_actual = None
+
     if not request.user.is_superuser:
         try:
             trabajador_actual = Trabajador.objects.get(user=request.user)
             if not trabajador_actual.es_coordinador:
                 return redirect('index')
             es_coordinador = True
+            empresa_actual = trabajador_actual.empresa
         except Trabajador.DoesNotExist:
             return redirect('index')
+    else:
+        empresa_id = request.GET.get('empresa_id')
+        if empresa_id:
+            try:
+                empresa_actual = Empresa.objects.get(id_empresa=empresa_id)
+            except Empresa.DoesNotExist:
+                pass
 
-    # Coordinador solo ve su empresa, superadmin ve todas
-    if es_coordinador:
-        trabajador_actual = Trabajador.objects.get(user=request.user)
+    if empresa_actual:
         trabajadores = Trabajador.objects.filter(
-            empresa=trabajador_actual.empresa
+            empresa=empresa_actual
         ).select_related('cargo', 'empresa').order_by('-nivel_jerarquico__id_nivel_jerarquico')
     else:
-        trabajadores = Trabajador.objects.all().select_related('cargo', 'empresa').order_by('empresa__nombre_empresa', '-nivel_jerarquico__id_nivel_jerarquico')
-    
-    total_por_realizar = 0
+        trabajadores = Trabajador.objects.none()
+
     autos_listas = 0
     autos_pendientes = 0
     jefaturas_listas = 0
     jefaturas_pendientes = 0
+    total_por_realizar = 0
 
     for t in trabajadores:
         t.auto_lista = Autoevaluacion.objects.filter(trabajador=t, estado_finalizacion=True).exists()
@@ -38,7 +45,7 @@ def panel_seguimiento(request):
         else:
             autos_pendientes += 1
             total_por_realizar += 1
-        
+
         if t.id_jefe_directo:
             t.tiene_jefe = True
             t.jefe_lista = EvaluacionJefatura.objects.filter(trabajador_evaluado=t, estado_finalizacion=True).exists()
@@ -63,7 +70,7 @@ def panel_seguimiento(request):
         'autos_pendientes': autos_pendientes,
         'jefaturas_listas': jefaturas_listas,
         'jefaturas_pendientes': jefaturas_pendientes,
-        'empresas': Empresa.objects.filter(empresa_activa=True),
-        'es_coordinador': es_coordinador,  
+        'empresa_actual': empresa_actual,
+        'es_coordinador': es_coordinador,
     }
     return render(request, 'cuestionario/seguimiento.html', context)

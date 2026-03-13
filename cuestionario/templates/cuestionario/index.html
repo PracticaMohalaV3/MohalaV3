@@ -17,9 +17,15 @@
             <section>
                 <span class="icon solid major fa-chart-line"></span>
                 <h3>Seguimiento General</h3>
-                <p>Visualiza el estado de las evaluaciones de todos los colaboradores en tiempo real.</p>
+                <p>Visualiza el estado de las evaluaciones por empresa.</p>
                 <ul class="actions">
-                    <li><a href="{% url 'seguimiento_admin' %}" class="button primary">Ver Seguimiento en Tiempo Real</a>
+                    {% for empresa in empresas_activas %}
+                    <li>
+                        <a href="{% url 'seguimiento_admin' %}?empresa_id={{ empresa.id_empresa }}" class="button primary">
+                            {{ empresa.nombre_empresa }}
+                        </a>
+                    </li>
+                    {% endfor %}
                 </ul>
             </section>
             <section>

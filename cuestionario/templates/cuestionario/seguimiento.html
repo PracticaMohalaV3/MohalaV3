@@ -3,7 +3,7 @@
 {% block content %}
 <section>
     <header>
-        <h2>Seguimiento</h2>
+        <h2>Seguimiento{% if empresa_actual %} — {{ empresa_actual.nombre_empresa }}{% endif %}</h2>
     </header>
 
     <div class="row">
@@ -44,7 +44,6 @@
                     <td style="text-align: center;">
                         <strong>{{ t.nivel_jerarquico }}</strong><br>
                     </td>
-                    
                     <td style="text-align: center;">
                         {% if t.auto_lista %}
                             <span style="color: #51ff85;">✅ Lista</span>
@@ -52,7 +51,6 @@
                             <span style="color: #ffc107;">⏳ Pendiente</span>
                         {% endif %}
                     </td>
-
                     <td style="text-align: center;">
                         {% if not t.tiene_jefe %}
                             <span style="opacity: 0.3;">N/A</span>
@@ -62,7 +60,6 @@
                             <span style="color: #ffc107;">⏳ Pendiente</span>
                         {% endif %}
                     </td>
-
                     <td style="text-align: center;">
                         {% if t.diff_promedio is not None %}
                             <a href="{% url 'detalle_seguimiento' t.id_trabajador %}" class="button small primary">
@@ -79,35 +76,23 @@
     </div>
 
     <ul class="actions">
-    <li>
-        <a href="{% url 'index' %}" class="button primary">Volver al Panel</a>
-    </li>
-    
-    {% if user.is_superuser or es_coordinador %}
-    <li>
-        <form method="GET" action="{% url 'generar_reporte_global_pdf' %}" style="display: inline-flex; align-items: center; gap: 0.5em;">
-            <select name="empresa_id" required
-                    style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px;">
-                <option value="">-- Empresa --</option>
-                {% for empresa in empresas %}
-                    <option value="{{ empresa.id_empresa }}">{{ empresa.nombre_empresa }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="button primary">📊 Generar Reporte Respuestas</button>
-        </form>
-    </li>
-    
-    <li>
-    <a href="{% url 'panel_gemini' %}" class="button primary" id="btn-gemini"
-       onclick="
-           var empresaId = document.querySelector('select[name=empresa_id]').value;
-           if(empresaId) { this.href = '{% url 'panel_gemini' %}?empresa_id=' + empresaId; }
-       ">
-        🤖 Panel Informe con IA
-    </a>
-    </li>
-    
-    {% endif %}
+        <li>
+            <a href="{% url 'index' %}" class="button primary">Volver al Panel</a>
+        </li>
+        {% if user.is_superuser or es_coordinador %}
+        {% if empresa_actual %}
+        <li>
+            <a href="{% url 'generar_reporte_global_pdf' %}?empresa_id={{ empresa_actual.id_empresa }}" class="button primary">
+                📊 Generar Reporte Respuestas
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'panel_gemini' %}?empresa_id={{ empresa_actual.id_empresa }}" class="button primary">
+                🤖 Panel Informe con IA
+            </a>
+        </li>
+        {% endif %}
+        {% endif %}
     </ul>
 </section>
 {% endblock %}
