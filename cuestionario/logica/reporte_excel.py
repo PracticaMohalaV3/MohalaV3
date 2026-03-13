@@ -9,14 +9,23 @@ from io import BytesIO
 
 @login_required
 def generar_excel_detalle(request, trabajador_id):
-    """Genera el Excel del reporte de evaluación usando openpyxl"""
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     try:
         trabajador = Trabajador.objects.select_related('cargo', 'nivel_jerarquico', 'id_jefe_directo').get(id_trabajador=trabajador_id)
     except Trabajador.DoesNotExist:
         return redirect('seguimiento_admin')
+
+    if trabajador_actual and trabajador.empresa != trabajador_actual.empresa:
+        return redirect('index')
 
     empresa = trabajador.empresa
 

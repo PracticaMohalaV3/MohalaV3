@@ -14,15 +14,24 @@ from xml.sax.saxutils import escape
 
 @login_required
 def generar_pdf_detalle(request, trabajador_id):
-    """Genera el PDF del reporte de evaluación usando ReportLab"""
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     try:
         trabajador = Trabajador.objects.select_related('cargo', 'nivel_jerarquico', 'id_jefe_directo').get(id_trabajador=trabajador_id)
     except Trabajador.DoesNotExist:
         return redirect('seguimiento_admin')
-    
+
+    if trabajador_actual and trabajador.empresa != trabajador_actual.empresa:
+        return redirect('index')
+
     empresa = trabajador.empresa
 
     resultados = ResultadoConsolidado.objects.filter(
