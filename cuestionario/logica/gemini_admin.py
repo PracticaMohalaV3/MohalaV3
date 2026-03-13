@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from cuestionario.models import PromptGemini, Biblioteca, ReporteGlobal, Empresa
+from cuestionario.models import PromptGemini, Biblioteca, ReporteGlobal, Empresa, Trabajador
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -19,9 +19,18 @@ genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 @login_required
 def panel_gemini(request):
+    es_coordinador = False
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     empresa_id = request.GET.get('empresa_id')
     empresa_obj = None
 
@@ -31,63 +40,91 @@ def panel_gemini(request):
         except Empresa.DoesNotExist:
             pass
 
+    # Coordinador siempre ve su empresa
+    if es_coordinador:
+        empresa_obj = trabajador_actual.empresa
+
     if empresa_obj:
         ultimo_prompt = PromptGemini.objects.filter(empresa=empresa_obj).first()
         historial = PromptGemini.objects.filter(empresa=empresa_obj)[:20]
     else:
         ultimo_prompt = PromptGemini.objects.first()
         historial = PromptGemini.objects.all()[:20]
-    
+
     context = {
         'ultimo_prompt': ultimo_prompt,
         'historial': historial,
         'empresas': Empresa.objects.filter(empresa_activa=True),
-        'empresa_actual': empresa_obj,  
+        'empresa_actual': empresa_obj,
+        'es_coordinador': es_coordinador,
     }
-    
+
     return render(request, 'cuestionario/gemini_admin.html', context)
 
 
 @login_required
 def editar_prompt(request):
-    """Editar y guardar nuevo prompt"""
+    es_coordinador = False
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     if request.method == 'POST':
         prompt_texto = request.POST.get('prompt_texto', '')
-        empresa_id = request.POST.get('empresa_id')  
-        
+        empresa_id = request.POST.get('empresa_id')
+
+        # Coordinador solo puede crear prompts de su empresa
+        if es_coordinador:
+            empresa_id = trabajador_actual.empresa.id_empresa
+
         if prompt_texto.strip():
             PromptGemini.objects.create(
                 prompt_texto=prompt_texto,
-                empresa_id=empresa_id if empresa_id else None 
+                empresa_id=empresa_id if empresa_id else None
             )
             return redirect('panel_gemini')
-    
+
     return redirect('panel_gemini')
 
 
 @login_required
 def generar_informe_gemini(request, prompt_id):
-    """Generar informe usando Gemini y crear PDF"""
+    es_coordinador = False
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     try:
         prompt_obj = PromptGemini.objects.get(id_prompt=prompt_id)
     except PromptGemini.DoesNotExist:
         return HttpResponse("Prompt no encontrado", status=404)
-    
+
+    # Coordinador solo puede generar informes de su empresa
+    if es_coordinador and prompt_obj.empresa != trabajador_actual.empresa:
+        return redirect('index')
+
     if prompt_obj.archivo_pdf:
         response_http = HttpResponse(prompt_obj.archivo_pdf, content_type='application/pdf')
         response_http['Content-Disposition'] = f'inline; filename="informe_gemini_{prompt_id}.pdf"'
         return response_http
-    
+
     try:
         model = genai.GenerativeModel('models/gemini-2.5-flash')
 
-        # CAMBIO: filtrar Biblioteca y ReporteGlobal por empresa del prompt
         if prompt_obj.empresa:
             docs_biblioteca = Biblioteca.objects.filter(
                 estado_carga=True,
@@ -109,15 +146,15 @@ def generar_informe_gemini(request, prompt_id):
 
         response = model.generate_content(partes)
         respuesta_texto = response.text
-        
+
         prompt_obj.respuesta_gemini = respuesta_texto
         prompt_obj.pdf_generado = True
         prompt_obj.save()
-        
+
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=1*inch, bottomMargin=1*inch, leftMargin=1*inch, rightMargin=1*inch)
         elements = []
-        
+
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -143,24 +180,24 @@ def generar_informe_gemini(request, prompt_id):
             spaceAfter=10,
             spaceBefore=15
         )
-        
+
         elements.append(Paragraph("Informe Generado por Gemini AI", title_style))
         elements.append(Spacer(1, 0.2*inch))
-        
+
         fecha_generacion = prompt_obj.timestamp.strftime("%d/%m/%Y %H:%M")
         elements.append(Paragraph(f"<b>Fecha de generación:</b> {fecha_generacion}", body_style))
         if prompt_obj.empresa:
             elements.append(Paragraph(f"<b>Empresa:</b> {prompt_obj.empresa.nombre_empresa}", body_style))
         elements.append(Spacer(1, 0.1*inch))
-        
+
         elements.append(Paragraph("Prompt Utilizado", subtitle_style))
         prompt_escapado = prompt_obj.prompt_texto.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
         elements.append(Paragraph(prompt_escapado, body_style))
         elements.append(Spacer(1, 0.3*inch))
-        
+
         elements.append(Paragraph("Informe Generado", title_style))
         elements.append(Spacer(1, 0.1*inch))
-        
+
         lineas = respuesta_texto.split('\n')
         for linea in lineas:
             if linea.strip():
@@ -176,18 +213,18 @@ def generar_informe_gemini(request, prompt_id):
                 except Exception as e:
                     print(f"Error procesando línea: {str(e)}")
                     continue
-        
+
         doc.build(elements)
         pdf = buffer.getvalue()
         buffer.close()
-        
+
         prompt_obj.archivo_pdf = pdf
         prompt_obj.save()
-        
+
         response_http = HttpResponse(pdf, content_type='application/pdf')
         response_http['Content-Disposition'] = f'inline; filename="informe_gemini_{prompt_id}.pdf"'
         return response_http
-        
+
     except Exception as e:
         error_msg = f"ERROR al generar informe: {str(e)}"
         print(error_msg)
@@ -208,16 +245,15 @@ def generar_informe_gemini(request, prompt_id):
 
 @login_required
 def listar_modelos(request):
-    """Listar modelos disponibles en tu API key"""
     if not request.user.is_superuser:
         return redirect('index')
-    
+
     try:
         modelos = []
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods:
                 modelos.append(m.name)
-        
+
         return HttpResponse(f"""
             <html>
             <body style="font-family: Arial; padding: 40px;">
@@ -236,31 +272,40 @@ def listar_modelos(request):
 
 @login_required
 def ver_informe_gemini(request, prompt_id):
-    """Ver el PDF generado guardado en la BD"""
+    es_coordinador = False
     if not request.user.is_superuser:
-        return redirect('index')
-    
+        try:
+            trabajador_actual = Trabajador.objects.get(user=request.user)
+            if not trabajador_actual.es_coordinador:
+                return redirect('index')
+            es_coordinador = True
+        except Trabajador.DoesNotExist:
+            return redirect('index')
+    else:
+        trabajador_actual = None
+
     try:
         prompt_obj = PromptGemini.objects.get(id_prompt=prompt_id)
     except PromptGemini.DoesNotExist:
         return HttpResponse("Prompt no encontrado", status=404)
-    
-    # MODIFICADO: Si existe el PDF guardado, mostrarlo directamente
+
+    # Coordinador solo puede ver informes de su empresa
+    if es_coordinador and prompt_obj.empresa != trabajador_actual.empresa:
+        return redirect('index')
+
     if prompt_obj.archivo_pdf:
         response = HttpResponse(prompt_obj.archivo_pdf, content_type='application/pdf')
         response['Content-Disposition'] = f'inline; filename="informe_gemini_{prompt_id}.pdf"'
         return response
-    
-    # Si no hay PDF guardado, mostrar mensaje
+
     if not prompt_obj.respuesta_gemini:
         return HttpResponse("Este prompt aún no tiene informe generado. Haz click en 'Generar PDF' primero.", status=404)
-    
-    # Si solo tiene respuesta de texto pero no PDF, mostrar HTML
+
     contenido = prompt_obj.respuesta_gemini
     contenido = contenido.replace('**', '<strong>').replace('**', '</strong>')
     contenido = contenido.replace('*', '<em>').replace('*', '</em>')
     contenido = contenido.replace('\n', '<br>')
-    
+
     return HttpResponse(f"""
         <html>
         <head>
