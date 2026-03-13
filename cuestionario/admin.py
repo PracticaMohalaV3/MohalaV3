@@ -99,19 +99,6 @@ class ResultadoConsolidadoAdmin(admin.ModelAdmin):
     readonly_fields = ('diferencia',)
     ordering = ('id_resultado_consolidado',)
 
-@admin.register(DescripcionRespuesta)
-class DescripcionRespuestaAdmin(admin.ModelAdmin):
-    list_display = ('id_descripcion_respuesta', 'textos_evaluacion_codigo_excel', 'get_descripcion_corta', 'escala', 'titulo', 'empresa')
-    list_filter = ('escala', 'empresa')
-    search_fields = ('textos_evaluacion_codigo_excel', 'titulo', 'descripcion')
-    ordering = ('id_descripcion_respuesta',)
-
-    @admin.display(description='Descripción')
-    def get_descripcion_corta(self, obj):
-        if obj.descripcion and len(obj.descripcion) > 50:
-            return obj.descripcion[:50] + "..."
-        return obj.descripcion
-
 @admin.register(PromptGemini)
 class PromptGeminiAdmin(admin.ModelAdmin):
     list_display = ['id_prompt', 'prompt_texto', 'timestamp', 'pdf_generado', 'ver_pdf_link']
