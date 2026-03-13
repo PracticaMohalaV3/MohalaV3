@@ -145,7 +145,8 @@ class NivelJerarquico(models.Model):
 class Escala(models.Model):
     id_escala = models.IntegerField(primary_key=True)
     valor = models.IntegerField()
-    descripcion = models.CharField(max_length=100)
+    titulo = models.CharField(max_length=100)        
+    descripcion = models.CharField(max_length=250)   
     empresa = models.ForeignKey(
         'Empresa', 
         on_delete=models.DO_NOTHING, 
@@ -157,7 +158,7 @@ class Escala(models.Model):
         db_table = 'ESCALA'
 
     def __str__(self):
-        return f"{self.valor} - {self.descripcion}"
+        return f"{self.valor} - {self.titulo} - {self.descripcion}"       
 
 # =========================
 # Tabla Dimension
@@ -296,33 +297,6 @@ class CodigoEvaluacion(models.Model):
         managed = False
         db_table = 'CODIGO_EVALUACION'
         unique_together = (('empresa', 'textos_evaluacion_codigo_excel'),) 
-
-# =========================
-# Tabla Descripcion Respuesta
-# =========================
-class DescripcionRespuesta(models.Model):
-    id_descripcion_respuesta = models.AutoField(primary_key=True)
-    titulo = models.CharField(max_length=100)
-    descripcion = models.TextField()
-    empresa = models.ForeignKey(
-        'Empresa', 
-        on_delete=models.DO_NOTHING, 
-        db_column='empresa_id_empresa'
-    )
-    textos_evaluacion_codigo_excel = models.CharField(max_length=10)
-    escala = models.ForeignKey(
-        'Escala', 
-        on_delete=models.DO_NOTHING, 
-        db_column='escala_id_escala'
-    )
-
-    class Meta:
-        managed = False
-        db_table = 'DESCRIPCION_RESPUESTA'
-        unique_together = (('empresa', 'textos_evaluacion_codigo_excel', 'escala'),)
-
-    def __str__(self):
-        return f"{self.textos_evaluacion_codigo_excel} - Escala {self.escala.id_escala}"
 
 # =========================
 # Tabla Trabajador
