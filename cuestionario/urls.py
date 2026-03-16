@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from . import logica as views
-from .logica import validador_login, seguimiento, detalle_seguimiento, reporte_pdf, reporte_excel, gemini_admin, reporte_global, manejo_archivos, edicion_cuestionario 
+from .logica import validador_login, seguimiento, detalle_seguimiento, reporte_pdf, reporte_excel, gemini_admin, reporte_global, manejo_archivos, edicion_cuestionario, poblador
 
 urlpatterns = [
     path('login/', validador_login.login_view, name='login'),
@@ -69,11 +69,22 @@ urlpatterns = [
          views.ver_resultados, 
          name='ver_resultados'),
 
-     path('edicion/', edicion_cuestionario.panel_edicion, name='panel_edicion'),
-     path('edicion/dimension/editar/<int:dimension_id>/', edicion_cuestionario.editar_dimension, name='editar_dimension'),
-     path('edicion/competencia/editar/<int:competencia_id>/', edicion_cuestionario.editar_competencia, name='editar_competencia'),
-     path('edicion/nivel/editar/<int:nivel_id>/', edicion_cuestionario.editar_nivel, name='editar_nivel'),
-     path('edicion/texto/editar/<int:texto_id>/', edicion_cuestionario.editar_texto, name='editar_texto'),
-     path('edicion/escala/editar/<int:escala_id>/', edicion_cuestionario.editar_escala, name='editar_escala'),
-    
+    path('edicion/', edicion_cuestionario.panel_edicion, name='panel_edicion'),
+    path('edicion/dimension/editar/<int:dimension_id>/', edicion_cuestionario.editar_dimension, name='editar_dimension'),
+    path('edicion/competencia/editar/<int:competencia_id>/', edicion_cuestionario.editar_competencia, name='editar_competencia'),
+    path('edicion/nivel/editar/<int:nivel_id>/', edicion_cuestionario.editar_nivel, name='editar_nivel'),
+    path('edicion/texto/editar/<int:texto_id>/', edicion_cuestionario.editar_texto, name='editar_texto'),
+    path('edicion/escala/editar/<int:escala_id>/', edicion_cuestionario.editar_escala, name='editar_escala'),
+
+    # RUTAS POBLADOR
+    path('poblador/', poblador.panel_poblador, name='panel_poblador'),
+    path('poblador/empresa/', poblador.guardar_empresa, name='guardar_empresa'),
+    path('poblador/departamento/', poblador.guardar_departamento, name='guardar_departamento'),
+    path('poblador/nivel/', poblador.guardar_nivel, name='guardar_nivel'),
+    path('poblador/escala/', poblador.guardar_escala, name='guardar_escala'),
+    path('poblador/dimension/', poblador.guardar_dimension, name='guardar_dimension'),
+    path('poblador/competencia/', poblador.guardar_competencia, name='guardar_competencia'),
+    path('poblador/cargo/', poblador.guardar_cargo, name='guardar_cargo'),
+    path('poblador/texto/', poblador.guardar_texto, name='guardar_texto'),
+    path('poblador/trabajador/', poblador.guardar_trabajador, name='guardar_trabajador'),
 ]

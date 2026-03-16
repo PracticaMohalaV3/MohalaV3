@@ -50,7 +50,17 @@
                     {% endfor %}
                 </ul>
             </section>
+            <section>
+                <span class="icon solid major fa-building"></span>
+                <h3>Registrar Empresa</h3>
+                <p>Agrega una nueva empresa y completa todos sus datos estructurales.</p>
+                <ul class="actions">
+                    <li><a href="{% url 'panel_poblador' %}" class="button primary">Poblar Nueva Empresa</a></li>
+                </ul>
+            </section>
         </div>
+    </section>
+
     {% else %}
     <section>
         <header>
