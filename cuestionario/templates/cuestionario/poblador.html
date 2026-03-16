@@ -7,24 +7,6 @@
         <p>Registra una nueva empresa y completa todos sus datos en orden.</p>
     </header>
 
-    <!-- SELECTOR DE EMPRESA EXISTENTE -->
-    <div class="box" style="margin-bottom: 2em;">
-        <strong>¿Continuar con una empresa ya creada?</strong>
-        <div style="margin-top: 0.8em; display: flex; gap: 1em; align-items: center; flex-wrap: wrap;">
-            <select id="selector-empresa" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 0.5em 1em; border-radius: 4px; min-width: 250px;">
-                <option value="">-- Seleccionar empresa existente --</option>
-                {% for emp in empresas %}
-                    <option value="{{ emp.id_empresa }}" {% if empresa_actual and empresa_actual.id_empresa == emp.id_empresa %}selected{% endif %}>
-                        {{ emp.nombre_empresa }} (ID {{ emp.id_empresa }})
-                    </option>
-                {% endfor %}
-            </select>
-            <button onclick="cargarEmpresa()" class="button small">Cargar</button>
-        </div>
-    </div>
-
-    <hr />
-
     <!-- ══════════════════════════════════════ -->
     <!-- 1. EMPRESA                             -->
     <!-- ══════════════════════════════════════ -->
@@ -549,12 +531,6 @@ function actualizarSelect(selectId, opciones, valorKey, textoKey) {
     sel.appendChild(opt);
 }
 
-function cargarEmpresa() {
-    const sel = document.getElementById('selector-empresa');
-    const id = sel.value;
-    if (id) window.location.href = `?empresa_id=${id}`;
-}
-
 // ─── CSRF ─────────────────────────────────────────
 function getCookie(name) {
     let cookieValue = null;
@@ -589,7 +565,6 @@ async function guardarEmpresa() {
         empresaId = res.id_empresa;
         msg('msg-empresa', `✅ Empresa "${res.nombre}" creada con ID ${res.id_empresa}`);
         habilitarSecciones();
-        // Recargar para actualizar todos los selects con el nuevo empresa_id
         setTimeout(() => { window.location.href = `?empresa_id=${res.id_empresa}`; }, 1200);
     } else {
         msg('msg-empresa', `❌ ${res.error}`, false);
@@ -598,7 +573,7 @@ async function guardarEmpresa() {
 
 // ─── 2. DEPARTAMENTO ──────────────────────────────
 async function guardarDepartamento() {
-    if (!empresaId) { msg('msg-departamento', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-departamento', '❌ Primero crea una empresa', false); return; }
     const nombre = document.getElementById('nombre_departamento').value.trim();
     if (!nombre) { msg('msg-departamento', '❌ El nombre es obligatorio', false); return; }
 
@@ -606,7 +581,6 @@ async function guardarDepartamento() {
     if (res.ok) {
         mostrarTabla('wrapper-tabla-departamentos');
         agregarFila('tabla-departamentos', [res.id, res.nombre]);
-        // Actualizar select de departamentos en trabajadores
         actualizarSelect('t_departamento', res, 'id', 'nombre');
         document.getElementById('nombre_departamento').value = '';
         msg('msg-departamento', `✅ "${res.nombre}" agregado`);
@@ -617,7 +591,7 @@ async function guardarDepartamento() {
 
 // ─── 3. NIVEL ─────────────────────────────────────
 async function guardarNivel() {
-    if (!empresaId) { msg('msg-nivel', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-nivel', '❌ Primero crea una empresa', false); return; }
     const nombre = document.getElementById('nombre_nivel').value.trim();
     if (!nombre) { msg('msg-nivel', '❌ El nombre es obligatorio', false); return; }
 
@@ -626,7 +600,6 @@ async function guardarNivel() {
         mostrarTabla('wrapper-tabla-niveles');
         agregarFila('tabla-niveles', [res.id, res.nombre]);
         nivelesData.push({ id: res.id, nombre: res.nombre });
-        // Actualizar selects de nivel
         ['select-nivel-cargo', 't_nivel'].forEach(id => actualizarSelect(id, res, 'id', 'nombre'));
         document.getElementById('nombre_nivel').value = '';
         msg('msg-nivel', `✅ "${res.nombre}" agregado`);
@@ -637,7 +610,7 @@ async function guardarNivel() {
 
 // ─── 4. ESCALA ────────────────────────────────────
 async function guardarEscala() {
-    if (!empresaId) { msg('msg-escala', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-escala', '❌ Primero crea una empresa', false); return; }
     const filas = [];
     for (let i = 1; i <= 4; i++) {
         const titulo = document.getElementById(`escala_titulo_${i}`)?.value.trim();
@@ -656,7 +629,7 @@ async function guardarEscala() {
 
 // ─── 5. DIMENSION ─────────────────────────────────
 async function guardarDimension() {
-    if (!empresaId) { msg('msg-dimension', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-dimension', '❌ Primero crea una empresa', false); return; }
     const nombre = document.getElementById('nombre_dimension').value.trim();
     if (!nombre) { msg('msg-dimension', '❌ El nombre es obligatorio', false); return; }
 
@@ -675,7 +648,7 @@ async function guardarDimension() {
 
 // ─── 6. COMPETENCIA ───────────────────────────────
 async function guardarCompetencia() {
-    if (!empresaId) { msg('msg-competencia', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-competencia', '❌ Primero crea una empresa', false); return; }
     const dim_id = document.getElementById('select-dimension-comp').value;
     const nombre = document.getElementById('nombre_competencia').value.trim();
     if (!dim_id) { msg('msg-competencia', '❌ Selecciona una dimensión', false); return; }
@@ -686,7 +659,6 @@ async function guardarCompetencia() {
         mostrarTabla('wrapper-tabla-competencias');
         agregarFila('tabla-competencias', [res.id, res.dimension, res.nombre]);
         competenciasData.push({ id: res.id, nombre: res.nombre, dim_id: parseInt(dim_id) });
-        // Agregar opción al select de textos con data-dim
         const sel = document.getElementById('select-competencia-texto');
         const opt = document.createElement('option');
         opt.value = res.id;
@@ -702,7 +674,7 @@ async function guardarCompetencia() {
 
 // ─── 7. CARGO ─────────────────────────────────────
 async function guardarCargo() {
-    if (!empresaId) { msg('msg-cargo', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-cargo', '❌ Primero crea una empresa', false); return; }
     const nivel_id = document.getElementById('select-nivel-cargo').value;
     const nombre = document.getElementById('nombre_cargo').value.trim();
     if (!nivel_id) { msg('msg-cargo', '❌ Selecciona un nivel', false); return; }
@@ -713,7 +685,6 @@ async function guardarCargo() {
         mostrarTabla('wrapper-tabla-cargos');
         agregarFila('tabla-cargos', [res.id, res.nivel, res.nombre]);
         cargosData.push({ id: res.id, nombre: res.nombre, nivel_id: parseInt(nivel_id) });
-        // Agregar al select de cargo en trabajadores con data-nivel
         const sel = document.getElementById('t_cargo');
         const opt = document.createElement('option');
         opt.value = res.id;
@@ -729,7 +700,7 @@ async function guardarCargo() {
 
 // ─── 8. TEXTO EVALUACION ──────────────────────────
 async function guardarTexto() {
-    if (!empresaId) { msg('msg-texto', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-texto', '❌ Primero crea una empresa', false); return; }
     const codigo = document.getElementById('codigo_excel').value.trim();
     const dim_id = document.getElementById('select-dimension-texto').value;
     const comp_id = document.getElementById('select-competencia-texto').value;
@@ -763,7 +734,7 @@ async function guardarTexto() {
 
 // ─── 9. TRABAJADOR ────────────────────────────────
 async function guardarTrabajador() {
-    if (!empresaId) { msg('msg-trabajador', '❌ Primero crea o selecciona una empresa', false); return; }
+    if (!empresaId) { msg('msg-trabajador', '❌ Primero crea una empresa', false); return; }
     const data = {
         empresa_id: empresaId,
         rut: document.getElementById('t_rut').value.trim(),
@@ -792,9 +763,7 @@ async function guardarTrabajador() {
             data.es_coordinador ? '<span style="color:#51ff85;">✅</span>' : '—'
         ]);
         trabajadoresData.push({ id: res.id, nombre: res.nombre });
-        // Agregar al select de jefe directo
         actualizarSelect('t_jefe', res, 'id', 'nombre');
-        // Limpiar campos
         ['t_rut','t_nombre','t_ap_paterno','t_ap_materno','t_email'].forEach(id => {
             document.getElementById(id).value = '';
         });
