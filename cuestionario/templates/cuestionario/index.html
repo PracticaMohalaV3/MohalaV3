@@ -18,7 +18,7 @@
                 <span class="icon solid major fa-chart-line"></span>
                 <h3>Seguimiento General</h3>
                 <p>Visualiza el estado de las evaluaciones por empresa.</p>
-                <ul class="actions">
+                <ul class="actions" style="flex-direction: column;">
                     {% for empresa in empresas_activas %}
                     <li>
                         <a href="{% url 'seguimiento_admin' %}?empresa_id={{ empresa.id_empresa }}" class="button primary">
@@ -40,7 +40,7 @@
                 <span class="icon solid major fa-edit"></span>
                 <h3>Edición de Cuestionario</h3>
                 <p>Edita dimensiones, competencias y textos de evaluación por empresa.</p>
-                <ul class="actions">
+                <ul class="actions" style="flex-direction: column;">
                     {% for empresa in empresas_activas %}
                     <li>
                         <a href="{% url 'panel_edicion' %}?empresa_id={{ empresa.id_empresa }}" class="button primary">
