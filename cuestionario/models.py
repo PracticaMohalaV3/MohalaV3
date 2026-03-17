@@ -116,9 +116,9 @@ class Departamento(models.Model):
     class Meta:
         managed = False
         db_table = 'DEPARTAMENTO'
-
+    
     def __str__(self):
-        return self.nombre_departamento
+        return f"{self.nombre_departamento} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
     
 # =========================
 # Tabla Nivel Jerarquico
@@ -137,7 +137,7 @@ class NivelJerarquico(models.Model):
         db_table = 'NIVEL_JERARQUICO'
 
     def __str__(self):
-        return self.nombre_nivel_jerarquico
+        return f"{self.nombre_nivel_jerarquico} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
     
 # =========================
 # Tabla Escala
@@ -158,7 +158,7 @@ class Escala(models.Model):
         db_table = 'ESCALA'
 
     def __str__(self):
-        return f"{self.valor} - {self.titulo} - {self.descripcion}"       
+        return f"{self.valor} - {self.titulo} - {self.descripcion} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"     
 
 # =========================
 # Tabla Dimension
@@ -175,9 +175,9 @@ class Dimension(models.Model):
     class Meta:
         managed = False
         db_table = 'DIMENSION'
-
+    
     def __str__(self):
-        return self.nombre_dimension
+        return f"{self.nombre_dimension} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
 
 # =========================
 # Tabla Competencia
@@ -199,9 +199,9 @@ class Competencia(models.Model):
     class Meta:
         managed = False
         db_table = 'COMPETENCIA'
-
+    
     def __str__(self):
-        return self.nombre_competencia
+        return f"{self.nombre_competencia} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
 
 # =========================
 # Tabla Cargo
@@ -223,9 +223,9 @@ class Cargo(models.Model):
     class Meta:
         managed = False
         db_table = 'CARGO'
-
+    
     def __str__(self):
-        return self.nombre_cargo
+        return f"{self.nombre_cargo} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
 
 # =========================
 # Tabla Textos Evaluación
@@ -355,10 +355,9 @@ class Trabajador(models.Model):
     @property
     def es_jefe(self):
         return self.subordinados.exists()
-
+    
     def __str__(self):
-        return f"{self.nombre} {self.apellido_paterno} | {self.rut}"
-
+        return f"{self.nombre} {self.apellido_paterno} | {self.rut} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
 
 # =========================
 # Tabla Autoevaluación
