@@ -123,7 +123,7 @@ def generar_informe_gemini(request, prompt_id):
         return response_http
 
     try:
-        model = genai.GenerativeModel('models/gemini-2.5-flash')
+        model = genai.GenerativeModel('models/gemini-2.5-flash') #Cambiar esta linea para cambiar modelo de Gemini
 
         if prompt_obj.empresa:
             docs_biblioteca = Biblioteca.objects.filter(
