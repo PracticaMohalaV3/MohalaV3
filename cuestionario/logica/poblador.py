@@ -27,6 +27,7 @@ def panel_poblador(request):
     context = {
         'empresa_actual': empresa_actual,
         'empresas': Empresa.objects.all().order_by('id_empresa'),
+        'empresa_ya_registrada': Empresa.objects.exists(),
     }
 
     if empresa_actual:
@@ -58,6 +59,9 @@ def guardar_empresa(request):
 
     if not nombre or not rut:
         return JsonResponse({'ok': False, 'error': 'Nombre y RUT son obligatorios'})
+
+    if Empresa.objects.exists():
+        return JsonResponse({'ok': False, 'error': 'Ya existe una empresa registrada. Usa el selector para cargarla.'})
 
     if Empresa.objects.filter(rut_empresa=rut).exists():
         return JsonResponse({'ok': False, 'error': f'Ya existe una empresa con RUT {rut}'})
@@ -134,7 +138,7 @@ def guardar_escala(request):
 
     data = json.loads(request.body)
     empresa_id = data.get('empresa_id')
-    filas = data.get('filas', [])  # lista de {valor, titulo, descripcion}
+    filas = data.get('filas', [])
 
     try:
         empresa = Empresa.objects.get(id_empresa=empresa_id)

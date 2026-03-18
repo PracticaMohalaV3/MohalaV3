@@ -25,6 +25,8 @@
 
     <hr />
 
+
+
     <!-- ══════════════════════════════════════ -->
     <!-- 1. EMPRESA                             -->
     <!-- ══════════════════════════════════════ -->
@@ -36,8 +38,11 @@
             <strong style="color: #51ff85;">✅ Empresa activa:</strong>
             {{ empresa_actual.nombre_empresa }} — RUT {{ empresa_actual.rut_empresa }} — ID {{ empresa_actual.id_empresa }}
         </div>
-        {% endif %}
-
+        {% elif empresa_ya_registrada %}
+        <div class="box" style="border-left: 3px solid #51ff85;">
+            <strong style="color: #51ff85;">✅ Empresa ya registrada.</strong> Usa el selector de arriba para cargarla.
+        </div>
+        {% else %}
         <div class="row">
             <div class="col-6 col-12-small">
                 <input type="text" id="nombre_empresa" placeholder="Nombre de la empresa" style="width: 100%;" />
@@ -50,6 +55,7 @@
         <ul class="actions">
             <li><button onclick="guardarEmpresa()" class="button primary">Guardar Empresa</button></li>
         </ul>
+        {% endif %}
     </div>
 
     <hr />
