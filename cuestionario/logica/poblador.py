@@ -60,9 +60,6 @@ def guardar_empresa(request):
     if not nombre or not rut:
         return JsonResponse({'ok': False, 'error': 'Nombre y RUT son obligatorios'})
 
-    if Empresa.objects.exists():
-        return JsonResponse({'ok': False, 'error': 'Ya existe una empresa registrada. Usa el selector para cargarla.'})
-
     if Empresa.objects.filter(rut_empresa=rut).exists():
         return JsonResponse({'ok': False, 'error': f'Ya existe una empresa con RUT {rut}'})
 
