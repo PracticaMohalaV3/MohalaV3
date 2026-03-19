@@ -6,6 +6,7 @@ def get_password_por_empresa(trabajador):
     passwords = {
         1: 'Mohala2026',
         2: 'Permify2026',
+        3: 'Redgroup2026',
     }
     return passwords.get(trabajador.empresa_id, 'DefaultPass2026')
 
