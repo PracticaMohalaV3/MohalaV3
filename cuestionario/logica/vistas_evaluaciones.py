@@ -77,6 +77,9 @@ def cuestionario_autoevaluacion(request, trabajador_id, dimension_id=None):
 
     descripciones_qs = Escala.objects.filter(empresa=empresa).order_by('valor')
 
+    primera_dimension = Dimension.objects.filter(empresa=empresa).order_by('id_dimension').first()
+    dimension_es_primera = (dimension_obj.id_dimension == primera_dimension.id_dimension)
+
     if request.method == 'POST':
         with transaction.atomic():
             for pregunta in preguntas_qs:
@@ -106,7 +109,8 @@ def cuestionario_autoevaluacion(request, trabajador_id, dimension_id=None):
         'trabajador': trabajador, 
         'preguntas': preguntas_qs, 
         'dimension': dimension_obj,
-        'descripciones': descripciones_qs
+        'descripciones': descripciones_qs,
+        'dimension_es_primera': dimension_es_primera,
     }
     return render(request, 'cuestionario/autoevaluacion.html', context)
 
@@ -201,6 +205,9 @@ def cuestionario_jefatura(request, evaluador_id, evaluado_id, dimension_id=None)
 
     descripciones_qs = Escala.objects.filter(empresa=empresa).order_by('valor')
 
+    primera_dimension = Dimension.objects.filter(empresa=empresa).order_by('id_dimension').first()
+    dimension_es_primera = (dimension_obj.id_dimension == primera_dimension.id_dimension)
+
     if request.method == 'POST':
         with transaction.atomic():
             for pregunta in preguntas_qs:
@@ -232,7 +239,8 @@ def cuestionario_jefatura(request, evaluador_id, evaluado_id, dimension_id=None)
         'evaluado': evaluado, 
         'preguntas': preguntas_qs, 
         'dimension': dimension_obj,
-        'descripciones': descripciones_qs
+        'descripciones': descripciones_qs,
+        'dimension_es_primera': dimension_es_primera,
     }
     return render(request, 'cuestionario/evaluacion_jefe.html', context)
 

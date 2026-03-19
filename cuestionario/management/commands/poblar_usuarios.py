@@ -7,6 +7,8 @@ def get_password_por_empresa(trabajador):
         1: 'Mohala2026',
         2: 'Permify2026',
         3: 'Redgroup2026',
+        #ir agregando aqui las nuevas pass que se quieran ir asignando a nuevas empresas
+        #si son pobladas a través del poblador web tendrán por defecto Mohala2026
     }
     return passwords.get(trabajador.empresa_id, 'DefaultPass2026')
 
