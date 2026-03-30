@@ -1,10 +1,6 @@
 import os
 from pathlib import Path
 import dj_database_url
-import pymysql # <--- AGREGADO: Para compatibilidad con Python 3.13
-
-# AGREGADO: Parche para que Django reconozca el driver en Railway
-pymysql.install_as_MySQLdb()
 
 # Rutas base
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,16 +9,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-yw8ipn#h#l*3rau(91-_*@hou*2ra=wkota3mriwczp8pupd=i')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Dominios permitidos (Actualizado para V2)
-ALLOWED_HOSTS = ['*'] # <--- Simplificado para evitar errores de dominio en el despliegue
+ALLOWED_HOSTS = ['*'] 
 
-# Confianza explícita para CSRF (Actualizado para V2)
 CSRF_TRUSTED_ORIGINS = [
-    'https://mohalav2-production.up.railway.app',
-    'https://*.railway.app'
+    'https://*.onrender.com'
 ]
 
-# Aplicaciones (Tu app es cuestionario)
+# Aplicaciones
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,19 +57,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Sistema_Mohala.wsgi.application'
 
-# --- 🗄️ BASE DE DATOS (Corregida para evitar Timeout en V2) ---
-MYSQL_URL = os.environ.get('DATABASE_URL') or os.environ.get('MYSQL_URL')
+# --- BASE DE DATOS ---
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if MYSQL_URL:
+if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(
-            MYSQL_URL,
-            conn_max_age=0, 
+            DATABASE_URL,
+            conn_max_age=0,
             ssl_require=False
         )
     }
-    # Forzamos el motor de MySQL
-    DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 else:
     DATABASES = {
         'default': {
@@ -85,7 +76,7 @@ else:
         }
     }
 
-# Idioma y hora (Tu ajuste a Santiago)
+# Idioma y hora
 LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
