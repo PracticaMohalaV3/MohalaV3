@@ -1,74 +1,62 @@
 -- =========================
--- Tabla Empresa
+-- Tabla empresa
 -- =========================
-
-INSERT INTO EMPRESA 
-    (ID_EMPRESA, NOMBRE_EMPRESA, RUT_EMPRESA, EMPRESA_ACTIVA, REGISTRADA_EN)
+INSERT INTO empresa 
+    (id_empresa, nombre_empresa, rut_empresa, empresa_activa, registrada_en)
 VALUES 
     (2, 'Permify SpA', '74.123.456-7', TRUE, NOW());
 
 -- =========================
--- Tabla Departamento
+-- Tabla departamento
 -- =========================
-
-INSERT INTO DEPARTAMENTO
-    (ID_DEPARTAMENTO, NOMBRE_DEPARTAMENTO, EMPRESA_ID_EMPRESA)
+INSERT INTO departamento
+    (id_departamento, nombre_departamento, empresa_id_empresa)
 VALUES
     (4, 'Gerencia General', 2),
     (5, 'Recursos Humanos', 2),
     (6, 'Tecnología de la Información', 2);
 
 -- =========================
--- Tabla Nivel Jerarquico
+-- Tabla nivel_jerarquico
 -- =========================
-
-INSERT INTO NIVEL_JERARQUICO
-    (ID_NIVEL_JERARQUICO, NOMBRE_NIVEL_JERARQUICO, EMPRESA_ID_EMPRESA)
+INSERT INTO nivel_jerarquico
+    (id_nivel_jerarquico, nombre_nivel_jerarquico, empresa_id_empresa)
 VALUES
     (4, 'Colaborador', 2),
     (5, 'Supervisor', 2),
     (6, 'Directivo', 2);
 
 -- ==========================
--- Tabla Escala
+-- Tabla escala
 -- =========================
-
-INSERT INTO ESCALA
-    (ID_ESCALA, VALOR, TITULO, DESCRIPCION, EMPRESA_ID_EMPRESA)
+INSERT INTO escala
+    (id_escala, valor, titulo, descripcion, empresa_id_empresa)
 VALUES
     (5, 1, 'Desempeño Insuficiente', 'No cumple estándares empresa 2.', 2),
-    (6, 2, 'Desempeño en Desarrollo', 'Cumple estándares de manera incompleta en empresa 2.', 2),
-    (7, 3, 'Desempeño Satisfactorio', 'Cumple de manera consistente en empresa 2.', 2),
-    (8, 4, 'Desempeño Sobresaliente', 'Supera de forma sostenida lo esperado en empresa 2.', 2);
+    (6, 2, 'Desempeño en Desarrollo', 'Cumple estándares de manera incompleta.', 2),
+    (7, 3, 'Desempeño Satisfactorio', 'Cumple de manera consistente.', 2),
+    (8, 4, 'Desempeño Sobresaliente', 'Supera de forma sostenida lo esperado.', 2);
 
 -- =========================
--- Tabla Dimension
+-- Tabla dimension
 -- =========================
-
-INSERT INTO DIMENSION 
-    (ID_DIMENSION, NOMBRE_DIMENSION, EMPRESA_ID_EMPRESA) 
+INSERT INTO dimension 
+    (id_dimension, nombre_dimension, empresa_id_empresa) 
 VALUES 
     (3, 'Corporativas', 2),
     (4, 'Técnicas', 2);
 
 -- =========================
--- Tabla Competencia
+-- Tabla competencia
 -- =========================
-
--- Competencias Corporativas (Dimension 3)
-INSERT INTO COMPETENCIA 
-    (ID_COMPETENCIA, NOMBRE_COMPETENCIA, DIMENSION_ID_DIMENSION, EMPRESA_ID_EMPRESA)    
+INSERT INTO competencia 
+    (id_competencia, nombre_competencia, dimension_id_dimension, empresa_id_empresa)    
 VALUES
     (16, 'Innovación y Creatividad', 3, 2),
     (17, 'Orientación al Cliente', 3, 2),
     (18, 'Cultura Organizacional', 3, 2),
     (19, 'Colaboración', 3, 2),
-    (20, 'Pensamiento Estratégico', 3, 2);
-
--- Competencias Técnicas (Dimension 4)
-INSERT INTO COMPETENCIA 
-    (ID_COMPETENCIA, NOMBRE_COMPETENCIA, DIMENSION_ID_DIMENSION, EMPRESA_ID_EMPRESA) 
-VALUES
+    (20, 'Pensamiento Estratégico', 3, 2),
     (21, 'Resolución de Problemas', 4, 2),
     (22, 'Aprendizaje Continuo', 4, 2),
     (23, 'Comunicación Efectiva', 4, 2),
@@ -79,38 +67,25 @@ VALUES
     (28, 'Logro de Objetivos', 4, 2),
     (29, 'Planificación y Control', 4, 2),
     (30, 'Iniciativa', 4, 2);
--- =========================
--- Tabla Cargo
--- =========================
 
--- Cargos Operativos (Nivel 4)
-INSERT INTO CARGO 
-    (ID_CARGO, NOMBRE_CARGO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
+-- =========================
+-- Tabla cargo
+-- =========================
+INSERT INTO cargo 
+    (id_cargo, nombre_cargo, empresa_id_empresa, nivel_jerarquico_id_nivel_jerarquico) 
 VALUES
     (7, 'Analista', 2, 4),
-    (8, 'Asistente Administrativo', 2, 4);
-
--- Cargos Tácticos (Nivel 5)
-INSERT INTO CARGO 
-    (ID_CARGO, NOMBRE_CARGO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
-VALUES
+    (8, 'Asistente Administrativo', 2, 4),
     (9, 'Jefe de Recursos Humanos', 2, 5),
-    (10, 'Coordinador de Proyectos', 2, 5);
-
--- Cargos Estratégicos (Nivel 6)
-INSERT INTO CARGO 
-    (ID_CARGO, NOMBRE_CARGO, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
-VALUES
+    (10, 'Coordinador de Proyectos', 2, 5),
     (11, 'Gerente General', 2, 6),
     (12, 'Gerente de Innovación', 2, 6);
 
 -- =========================
--- Tabla Textos Evaluación
+-- Tabla textos_evaluacion
 -- =========================
-
--- 16. INNOVACIÓN Y CREATIVIDAD (ID_COMPETENCIA: 16)
-INSERT INTO TEXTOS_EVALUACION 
-    (ID_TEXTOS_EVALUACION, CODIGO_EXCEL, TEXTO, EMPRESA_ID_EMPRESA, DIMENSION_ID_DIMENSION, COMPETENCIA_ID_COMPETENCIA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
+INSERT INTO textos_evaluacion 
+    (id_textos_evaluacion, codigo_excel, texto, empresa_id_empresa, dimension_id_dimension, competencia_id_competencia, nivel_jerarquico_id_nivel_jerarquico) 
 VALUES 
     (28, 'ICC1.1', 'Texto de prueba empresa 2.', 2, 3, 16, 4),
     (29, 'ICC1.2', 'Texto de prueba empresa 2.', 2, 3, 16, 4),
@@ -120,12 +95,7 @@ VALUES
     (33, 'ICS1.3', 'Texto de prueba empresa 2.', 2, 3, 16, 5),
     (34, 'ICD1.1', 'Texto de prueba empresa 2.', 2, 3, 16, 6),
     (35, 'ICD1.2', 'Texto de prueba empresa 2.', 2, 3, 16, 6),
-    (36, 'ICD1.3', 'Texto de prueba empresa 2.', 2, 3, 16, 6);
-
--- 17. ORIENTACIÓN AL CLIENTE (ID_COMPETENCIA: 17)
-INSERT INTO TEXTOS_EVALUACION 
-    (ID_TEXTOS_EVALUACION, CODIGO_EXCEL, TEXTO, EMPRESA_ID_EMPRESA, DIMENSION_ID_DIMENSION, COMPETENCIA_ID_COMPETENCIA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
-VALUES 
+    (36, 'ICD1.3', 'Texto de prueba empresa 2.', 2, 3, 16, 6),
     (37, 'OCC1.1', 'Texto de prueba empresa 2.', 2, 3, 17, 4),
     (38, 'OCC1.2', 'Texto de prueba empresa 2.', 2, 3, 17, 4),
     (39, 'OCC1.3', 'Texto de prueba empresa 2.', 2, 3, 17, 4),
@@ -134,12 +104,7 @@ VALUES
     (42, 'OCS1.3', 'Texto de prueba empresa 2.', 2, 3, 17, 5),
     (43, 'OCD1.1', 'Texto de prueba empresa 2.', 2, 3, 17, 6),
     (44, 'OCD1.2', 'Texto de prueba empresa 2.', 2, 3, 17, 6),
-    (45, 'OCD1.3', 'Texto de prueba empresa 2.', 2, 3, 17, 6);
-
--- 21. RESOLUCIÓN DE PROBLEMAS (ID_COMPETENCIA: 21)
-INSERT INTO TEXTOS_EVALUACION 
-    (ID_TEXTOS_EVALUACION, CODIGO_EXCEL, TEXTO, EMPRESA_ID_EMPRESA, DIMENSION_ID_DIMENSION, COMPETENCIA_ID_COMPETENCIA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO) 
-VALUES 
+    (45, 'OCD1.3', 'Texto de prueba empresa 2.', 2, 3, 17, 6),
     (46, 'RPC1.1', 'Texto de prueba empresa 2.', 2, 4, 21, 4),
     (47, 'RPC1.2', 'Texto de prueba empresa 2.', 2, 4, 21, 4),
     (48, 'RPC1.3', 'Texto de prueba empresa 2.', 2, 4, 21, 4),
@@ -150,72 +115,45 @@ VALUES
     (53, 'RPD1.2', 'Texto de prueba empresa 2.', 2, 4, 21, 6),
     (54, 'RPD1.3', 'Texto de prueba empresa 2.', 2, 4, 21, 6);
 
-
 -- =========================
--- Tabla Código Evaluación
+-- Tabla codigo_evaluacion
 -- =========================
-
-INSERT INTO CODIGO_EVALUACION
-    (ID_CODIGO_EVALUACION, EMPRESA_ID_EMPRESA, DIMENSION_ID_DIMENSION, COMPETENCIA_ID_COMPETENCIA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, TEXTOS_EVALUACION_CODIGO_EXCEL, TEXTOS_EVALUACION_EMPRESA_ID_EMPRESA)
+INSERT INTO codigo_evaluacion
+    (id_codigo_evaluacion, empresa_id_empresa, dimension_id_dimension, competencia_id_competencia, nivel_jerarquico_id_nivel_jerarquico, textos_evaluacion_codigo_excel, textos_evaluacion_empresa_id_empresa)
 VALUES
-    -- Innovación y Creatividad: Colaborador
-    (28, 2, 3, 16, 4, 'ICC1.1', 2),
-    (29, 2, 3, 16, 4, 'ICC1.2', 2),
-    (30, 2, 3, 16, 4, 'ICC1.3', 2),
-    -- Innovación y Creatividad: Supervisor
-    (31, 2, 3, 16, 5, 'ICS1.1', 2),
-    (32, 2, 3, 16, 5, 'ICS1.2', 2),
-    (33, 2, 3, 16, 5, 'ICS1.3', 2),
-    -- Innovación y Creatividad: Directivo
-    (34, 2, 3, 16, 6, 'ICD1.1', 2),
-    (35, 2, 3, 16, 6, 'ICD1.2', 2),
-    (36, 2, 3, 16, 6, 'ICD1.3', 2),
-    -- Orientación al Cliente: Colaborador
-    (37, 2, 3, 17, 4, 'OCC1.1', 2),
-    (38, 2, 3, 17, 4, 'OCC1.2', 2),
-    (39, 2, 3, 17, 4, 'OCC1.3', 2),
-    -- Orientación al Cliente: Supervisor
-    (40, 2, 3, 17, 5, 'OCS1.1', 2),
-    (41, 2, 3, 17, 5, 'OCS1.2', 2),
-    (42, 2, 3, 17, 5, 'OCS1.3', 2),
-    -- Orientación al Cliente: Directivo
-    (43, 2, 3, 17, 6, 'OCD1.1', 2),
-    (44, 2, 3, 17, 6, 'OCD1.2', 2),
-    (45, 2, 3, 17, 6, 'OCD1.3', 2),
-    -- Resolución de Problemas: Colaborador
-    (46, 2, 4, 21, 4, 'RPC1.1', 2),
-    (47, 2, 4, 21, 4, 'RPC1.2', 2),
-    (48, 2, 4, 21, 4, 'RPC1.3', 2),
-    -- Resolución de Problemas: Supervisor
-    (49, 2, 4, 21, 5, 'RPS1.1', 2),
-    (50, 2, 4, 21, 5, 'RPS1.2', 2),
-    (51, 2, 4, 21, 5, 'RPS1.3', 2),
-    -- Resolución de Problemas: Directivo
-    (52, 2, 4, 21, 6, 'RPD1.1', 2),
-    (53, 2, 4, 21, 6, 'RPD1.2', 2),
-    (54, 2, 4, 21, 6, 'RPD1.3', 2);
+    (28, 2, 3, 16, 4, 'ICC1.1', 2), (29, 2, 3, 16, 4, 'ICC1.2', 2), (30, 2, 3, 16, 4, 'ICC1.3', 2),
+    (31, 2, 3, 16, 5, 'ICS1.1', 2), (32, 2, 3, 16, 5, 'ICS1.2', 2), (33, 2, 3, 16, 5, 'ICS1.3', 2),
+    (34, 2, 3, 16, 6, 'ICD1.1', 2), (35, 2, 3, 16, 6, 'ICD1.2', 2), (36, 2, 3, 16, 6, 'ICD1.3', 2),
+    (37, 2, 3, 17, 4, 'OCC1.1', 2), (38, 2, 3, 17, 4, 'OCC1.2', 2), (39, 2, 3, 17, 4, 'OCC1.3', 2),
+    (40, 2, 3, 17, 5, 'OCS1.1', 2), (41, 2, 3, 17, 5, 'OCS1.2', 2), (42, 2, 3, 17, 5, 'OCS1.3', 2),
+    (43, 2, 3, 17, 6, 'OCD1.1', 2), (44, 2, 3, 17, 6, 'OCD1.2', 2), (45, 2, 3, 17, 6, 'OCD1.3', 2),
+    (46, 2, 4, 21, 4, 'RPC1.1', 2), (47, 2, 4, 21, 4, 'RPC1.2', 2), (48, 2, 4, 21, 4, 'RPC1.3', 2),
+    (49, 2, 4, 21, 5, 'RPS1.1', 2), (50, 2, 4, 21, 5, 'RPS1.2', 2), (51, 2, 4, 21, 5, 'RPS1.3', 2),
+    (52, 2, 4, 21, 6, 'RPD1.1', 2), (53, 2, 4, 21, 6, 'RPD1.2', 2), (54, 2, 4, 21, 6, 'RPD1.3', 2);
 
 -- =========================
--- Tabla Trabajador
+-- Tabla trabajador
 -- =========================
-
--- NIVEL 3: Directivo (No tienen Jefe)
-INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
+INSERT INTO trabajador 
+    (id_trabajador, rut, id_jefe_directo, nombre, apellido_paterno, apellido_materno, email, genero, es_coordinador, empresa_id_empresa, nivel_jerarquico_id_nivel_jerarquico, cargo_id_cargo, departamento_id_departamento)
 VALUES 
-    (7, '14.123.456-1', NULL, 'Carlos', 'Fuentes', 'Mora', 'c.fuentes@permify.cl', 'Masculino', 0, 2, 6, 11, 4),
-    (8, '15.234.567-2', NULL, 'Daniela', 'Vega', 'Soto', 'd.vega@permify.cl', 'Femenino', 1, 2, 6, 12, 4);
+    (7, '14.123.456-1', NULL, 'Carlos', 'Fuentes', 'Mora', 'c.fuentes@permify.cl', 'Masculino', FALSE, 2, 6, 11, 4),
+    (8, '15.234.567-2', NULL, 'Daniela', 'Vega', 'Soto', 'd.vega@permify.cl', 'Femenino', TRUE, 2, 6, 12, 4),
+    (9, '16.345.678-3', 7, 'Felipe', 'Rojas', 'Lima', 'f.rojas@permify.cl', 'Masculino', FALSE, 2, 5, 9, 5),
+    (10, '17.456.789-4', 8, 'Camila', 'Núñez', 'Ríos', 'c.nunez@permify.cl', 'Femenino', FALSE, 2, 5, 10, 6),
+    (11, '18.567.890-5', 9, 'Ignacio', 'Pérez', 'Blanc', 'i.perez@permify.cl', 'Masculino', FALSE, 2, 4, 7, 6),
+    (12, '19.678.901-6', 10, 'Javiera', 'Muñoz', 'Cerda', 'j.munoz@permify.cl', 'Femenino', FALSE, 2, 4, 8, 5);
 
--- NIVEL 2: Supervisor (Reportan al ID 7 y 8)
-INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
-VALUES 
-    (9, '16.345.678-3', 7, 'Felipe', 'Rojas', 'Lima', 'f.rojas@permify.cl', 'Masculino', 0, 2, 5, 9, 5),
-    (10, '17.456.789-4', 8, 'Camila', 'Núñez', 'Ríos', 'c.nunez@permify.cl', 'Femenino', 0, 2, 5, 10, 6);
-
--- NIVEL 1: Colaborador (Reportan al ID 9 y 10)
-INSERT INTO TRABAJADOR 
-    (ID_TRABAJADOR, RUT, ID_JEFE_DIRECTO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, EMAIL, GENERO, ES_COORDINADOR, EMPRESA_ID_EMPRESA, NIVEL_JERARQUICO_ID_NIVEL_JERARQUICO, CARGO_ID_CARGO, DEPARTAMENTO_ID_DEPARTAMENTO)
-VALUES 
-    (11, '18.567.890-5', 9, 'Ignacio', 'Pérez', 'Blanc', 'i.perez@permify.cl', 'Masculino', 0, 2, 4, 7, 6),
-    (12, '19.678.901-6', 10, 'Javiera', 'Muñoz', 'Cerda', 'j.munoz@permify.cl', 'Femenino', 0, 2, 4, 8, 5);
+-- ==========================================================
+-- Sincronización de Secuencias (Reset de Contadores)
+-- ==========================================================
+SELECT setval('empresa_id_empresa_seq', (SELECT MAX(id_empresa) FROM empresa));
+SELECT setval('departamento_id_departamento_seq', (SELECT MAX(id_departamento) FROM departamento));
+SELECT setval('nivel_jerarquico_id_nivel_jerarquico_seq', (SELECT MAX(id_nivel_jerarquico) FROM nivel_jerarquico));
+SELECT setval('escala_id_escala_seq', (SELECT MAX(id_escala) FROM escala));
+SELECT setval('dimension_id_dimension_seq', (SELECT MAX(id_dimension) FROM dimension));
+SELECT setval('competencia_id_competencia_seq', (SELECT MAX(id_competencia) FROM competencia));
+SELECT setval('cargo_id_cargo_seq', (SELECT MAX(id_cargo) FROM cargo));
+SELECT setval('textos_evaluacion_id_textos_evaluacion_seq', (SELECT MAX(id_textos_evaluacion) FROM textos_evaluacion));
+SELECT setval('codigo_evaluacion_id_codigo_evaluacion_seq', (SELECT MAX(id_codigo_evaluacion) FROM codigo_evaluacion));
+SELECT setval('trabajador_id_trabajador_seq', (SELECT MAX(id_trabajador) FROM trabajador));
