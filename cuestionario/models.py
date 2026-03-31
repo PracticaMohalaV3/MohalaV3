@@ -14,8 +14,8 @@ class Empresa(models.Model):
     registrada_en = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        managed = False
-        db_table = 'EMPRESA'
+        managed = True
+        db_table = 'empresa'
 
     def __str__(self):
         return f"{self.id_empresa} - {self.nombre_empresa} ({'Activa' if self.empresa_activa else 'Inactiva'})"
@@ -35,12 +35,12 @@ class Biblioteca(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='EMPRESA_ID_EMPRESA'
+        db_column='empresa_id_empresa'
     )
 
     class Meta:
-        managed = False
-        db_table = 'BIBLIOTECA'
+        managed = True
+        db_table = 'biblioteca'
 
     def __str__(self):
         return self.nombre
@@ -59,11 +59,12 @@ class ReporteGlobal(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='EMPRESA_ID_EMPRESA'
+        db_column='empresa_id_empresa'
     )
 
     class Meta:
-        db_table = 'REPORTE_GLOBAL'
+        managed = True
+        db_table = 'reporte_global'
 
     def __str__(self):
         return f"Reporte Global {self.id_reporte_global} - Periodo {self.periodo}"
@@ -84,7 +85,7 @@ class PromptGemini(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='EMPRESA_ID_EMPRESA'
+        db_column='empresa_id_empresa'
     )
     
     reporte_global = models.ForeignKey(
@@ -92,11 +93,12 @@ class PromptGemini(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='REPORTE_GLOBAL_ID'
+        db_column='reporte_global_id'
     )
 
     class Meta:
-        db_table = 'PROMPT_GEMINI'
+        managed = True
+        db_table = 'prompt_gemini'
         ordering = ['-timestamp']
 
     def __str__(self):
@@ -113,9 +115,10 @@ class Departamento(models.Model):
         on_delete=models.DO_NOTHING, 
         db_column='empresa_id_empresa'
     )
+
     class Meta:
-        managed = False
-        db_table = 'DEPARTAMENTO'
+        managed = True
+        db_table = 'departamento'
     
     def __str__(self):
         return f"{self.nombre_departamento} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
@@ -133,8 +136,8 @@ class NivelJerarquico(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'NIVEL_JERARQUICO'
+        managed = True
+        db_table = 'nivel_jerarquico'
 
     def __str__(self):
         return f"{self.nombre_nivel_jerarquico} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
@@ -143,7 +146,7 @@ class NivelJerarquico(models.Model):
 # Tabla Escala
 # =========================
 class Escala(models.Model):
-    id_escala = models.IntegerField(primary_key=True)
+    id_escala = models.AutoField(primary_key=True)
     valor = models.IntegerField()
     titulo = models.CharField(max_length=100)        
     descripcion = models.CharField(max_length=250)   
@@ -154,8 +157,8 @@ class Escala(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'ESCALA'
+        managed = True
+        db_table = 'escala'
 
     def __str__(self):
         return f"{self.valor} - {self.titulo} - {self.descripcion} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"     
@@ -173,8 +176,8 @@ class Dimension(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'DIMENSION'
+        managed = True
+        db_table = 'dimension'
     
     def __str__(self):
         return f"{self.nombre_dimension} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
@@ -197,8 +200,8 @@ class Competencia(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'COMPETENCIA'
+        managed = True
+        db_table = 'competencia'
     
     def __str__(self):
         return f"{self.nombre_competencia} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
@@ -221,8 +224,8 @@ class Cargo(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'CARGO'
+        managed = True
+        db_table = 'cargo'
     
     def __str__(self):
         return f"{self.nombre_cargo} | ID {self.empresa.id_empresa} - {self.empresa.nombre_empresa}"
@@ -256,8 +259,8 @@ class TextosEvaluacion(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'TEXTOS_EVALUACION'
+        managed = True
+        db_table = 'textos_evaluacion'
         unique_together = (('codigo_excel', 'empresa'),)
 
 # =========================
@@ -294,8 +297,8 @@ class CodigoEvaluacion(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'CODIGO_EVALUACION'
+        managed = True
+        db_table = 'codigo_evaluacion'
         unique_together = (('empresa', 'textos_evaluacion_codigo_excel'),) 
 
 # =========================
@@ -317,7 +320,7 @@ class Trabajador(models.Model):
     apellido_materno = models.CharField(max_length=40)
     email = models.CharField(max_length=80)
     genero = models.CharField(max_length=10)
-    es_coordinador = models.BooleanField(default=False, db_column='ES_COORDINADOR')
+    es_coordinador = models.BooleanField(default=False, db_column='es_coordinador')
     
     empresa = models.ForeignKey(
         'Empresa', 
@@ -349,8 +352,8 @@ class Trabajador(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'TRABAJADOR'
+        managed = True
+        db_table = 'trabajador'
 
     @property
     def es_jefe(self):
@@ -391,8 +394,8 @@ class Autoevaluacion(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'AUTOEVALUACION'
+        managed = True
+        db_table = 'autoevaluacion'
 
     def __str__(self):
         return f"Autoevaluación {self.id_autoevaluacion}"
@@ -424,7 +427,6 @@ class EvaluacionJefatura(models.Model):
         related_name='evaluaciones_recibidas'
     )
     
-    # FK compuesta a TEXTOS_EVALUACION
     textos_evaluacion_codigo_excel = models.CharField(max_length=10)
     textos_evaluacion_empresa = models.ForeignKey(
         'Empresa',
@@ -440,8 +442,8 @@ class EvaluacionJefatura(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'EVALUACION_JEFATURA'
+        managed = True
+        db_table = 'evaluacion_jefatura'
 
     def __str__(self):
         return f"Evaluación {self.id_evaluacion_jefatura}"
@@ -483,8 +485,8 @@ class ResultadoConsolidado(models.Model):
     )
 
     class Meta:
-        managed = False
-        db_table = 'RESULTADO_CONSOLIDADO'
+        managed = True
+        db_table = 'resultado_consolidado'
         unique_together = (('trabajador', 'textos_evaluacion_codigo_excel', 'periodo'),)
 
     def __str__(self):
